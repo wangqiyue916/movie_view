@@ -1,7 +1,6 @@
 SET NAMES utf8mb4;
 SET time_zone = '+08:00';
 
-CREATE DATABASE IF NOT EXISTS `movie` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `movie`;
 
 CREATE TABLE IF NOT EXISTS `movie`.`users` (
