@@ -1,6 +1,8 @@
 SET NAMES utf8mb4;
 SET time_zone = '+08:00';
 
+USE movie;
+
 CREATE TABLE IF NOT EXISTS users (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(50) NOT NULL,

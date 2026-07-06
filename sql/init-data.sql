@@ -1,6 +1,8 @@
 SET NAMES utf8mb4;
 SET time_zone = '+08:00';
 
+USE movie;
+
 INSERT INTO roles (code, name, description) VALUES
 ('USER', '普通用户', '前台普通用户'),
 ('OFFICIAL', '电影官方用户', '电影商或官方投稿用户'),
