@@ -31,6 +31,13 @@ update/001_repair_missing_tables.sql
 
 阿里云 DMS 有时会在执行整段 SQL 前预检查后续 `INSERT` 语句引用的表。遇到这种情况时，不要继续反复执行 `init-data.sql`，请先单独执行 `update/001_repair_missing_tables.sql`。
 
+如果执行 `update/001_repair_missing_tables.sql` 后仍然提示 `Table 'movie.merchandise' doesn't exist`，请按下面顺序排查：
+
+1. 执行 `check-tables.sql`，确认结果中是否包含 `merchandise`。
+2. 如果没有 `merchandise`，执行 `update/002_force_create_merchandise.sql`。
+3. 再次执行 `check-tables.sql`，确认 `SHOW TABLES LIKE 'merchandise'` 有返回结果。
+4. 确认后再执行 `init-data.sql`。
+
 ## Navicat 执行方式
 
 如果在 Navicat 中执行 SQL 文件时报错：
