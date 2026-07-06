@@ -149,17 +149,3 @@ INSERT INTO `movie`.`merchandise` (
 ) VALUES
 (1, 1, '星际主题电影海报', 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1200&q=80', '海报', 39.90, '星际主题装饰海报，适合收藏和房间装饰。', '淘宝', 'https://www.taobao.com', 'ONLINE')
 ON DUPLICATE KEY UPDATE name = VALUES(name), status = VALUES(status), updated_at = CURRENT_TIMESTAMP;
-
-INSERT INTO `movie`.`homepage_recommendations` (
-  section_code, target_type, target_id, title, image_url, sort_order, enabled
-) VALUES
-('BANNER_NEWS', 'NEWS', 1, '暑期档科幻电影热度持续升温', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80', 1, 1),
-('HOT_MOVIE', 'MOVIE', 1, '星际穿越', 'https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2206088801.jpg', 1, 1),
-('FEATURED_REVIEW', 'LONG_REVIEW', 1, '穿越星际之后，仍然回到人的情感', NULL, 1, 1),
-('RECOMMEND_MERCH', 'MERCHANDISE', 1, '星际主题电影海报', 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1200&q=80', 1, 1)
-ON DUPLICATE KEY UPDATE
-title = VALUES(title),
-image_url = VALUES(image_url),
-sort_order = VALUES(sort_order),
-enabled = VALUES(enabled),
-updated_at = CURRENT_TIMESTAMP;
