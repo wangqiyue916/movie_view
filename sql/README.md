@@ -12,6 +12,20 @@
 2. 执行 `schema.sql`。
 3. 执行 `init-data.sql`。
 
+如果执行 `init-data.sql` 时提示某张表不存在，例如：
+
+```text
+Table 'movie.homepage_recommendations' doesn't exist
+```
+
+说明 `schema.sql` 没有完整执行成功。可以先执行：
+
+```text
+update/001_repair_missing_tables.sql
+```
+
+然后重新执行 `init-data.sql`。
+
 ## Navicat 执行方式
 
 如果在 Navicat 中执行 SQL 文件时报错：
