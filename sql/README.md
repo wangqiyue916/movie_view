@@ -3,7 +3,7 @@
 ## 文件说明
 
 - `schema.sql`：数据库建表脚本，不包含删表语句，适合首次初始化云数据库。
-- `init-data.sql`：角色、权限和演示数据初始化脚本。
+- `init-data.sql`：角色、权限和演示数据初始化脚本，已包含演示数据依赖表的兜底建表语句。
 - `init-homepage-data.sql`：首页推荐位演示数据初始化脚本，依赖 `homepage_recommendations` 等表已存在。
 - `update/`：后续数据库变更脚本目录。
 
