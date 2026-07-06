@@ -11,8 +11,9 @@
 
 1. 确认数据库 `movie` 已存在。
 2. 执行 `schema.sql`。
-3. 执行 `init-data.sql`。
-4. 执行 `init-homepage-data.sql`。
+3. 如果使用阿里云 DMS 或 Navicat，建议先执行 `update/001_repair_missing_tables.sql`，确保初始化数据依赖的表都已存在。
+4. 执行 `init-data.sql`。
+5. 执行 `init-homepage-data.sql`。
 
 如果执行 `init-data.sql` 时提示某张表不存在，例如：
 
@@ -28,6 +29,8 @@ update/001_repair_missing_tables.sql
 
 然后重新执行 `init-data.sql`，最后执行 `init-homepage-data.sql`。
 
+阿里云 DMS 有时会在执行整段 SQL 前预检查后续 `INSERT` 语句引用的表。遇到这种情况时，不要继续反复执行 `init-data.sql`，请先单独执行 `update/001_repair_missing_tables.sql`。
+
 ## Navicat 执行方式
 
 如果在 Navicat 中执行 SQL 文件时报错：
@@ -41,7 +44,7 @@ No database selected
 1. 在左侧连接中展开 `movie` 连接。
 2. 找到并选中数据库 `movie`。
 3. 右键数据库 `movie`，选择“运行 SQL 文件”。
-4. 先运行 `schema.sql`，再运行 `init-data.sql`，最后运行 `init-homepage-data.sql`。
+4. 先运行 `schema.sql`，再运行 `update/001_repair_missing_tables.sql`，然后运行 `init-data.sql`，最后运行 `init-homepage-data.sql`。
 
 脚本已经做了两层处理：
 
