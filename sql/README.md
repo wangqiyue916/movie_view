@@ -27,13 +27,19 @@ No database selected
 3. 右键数据库 `movie`，选择“运行 SQL 文件”。
 4. 先运行 `schema.sql`，再运行 `init-data.sql`。
 
-脚本开头已经包含：
+脚本已经做了两层处理：
 
 ```sql
-USE movie;
+CREATE DATABASE IF NOT EXISTS `movie` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `movie`;
+CREATE TABLE IF NOT EXISTS `movie`.`users` (...);
 ```
 
-如果实际数据库名不是 `movie`，请把 `USE movie;` 改成真实数据库名。
+也就是说，表名都已经写成 `movie.users`、`movie.movies` 这种全限定形式。
+
+如果实际数据库名不是 `movie`，请把脚本中的 `` `movie` `` 批量替换为真实数据库名。
+
+如果仍然提示 `No database selected`，不要在连接节点上运行 SQL 文件。请先展开连接，选中具体数据库节点，再运行 SQL 文件。
 
 ## 命令示例
 

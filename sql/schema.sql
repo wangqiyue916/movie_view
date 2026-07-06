@@ -1,9 +1,10 @@
 SET NAMES utf8mb4;
 SET time_zone = '+08:00';
 
-USE movie;
+CREATE DATABASE IF NOT EXISTS `movie` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `movie`;
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS `movie`.`users` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(50) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
@@ -20,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
   KEY idx_users_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户表';
 
-CREATE TABLE IF NOT EXISTS roles (
+CREATE TABLE IF NOT EXISTS `movie`.`roles` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   code VARCHAR(50) NOT NULL,
   name VARCHAR(50) NOT NULL,
@@ -30,7 +31,7 @@ CREATE TABLE IF NOT EXISTS roles (
   UNIQUE KEY uk_roles_code (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='角色表';
 
-CREATE TABLE IF NOT EXISTS user_roles (
+CREATE TABLE IF NOT EXISTS `movie`.`user_roles` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   role_id BIGINT NOT NULL,
@@ -39,7 +40,7 @@ CREATE TABLE IF NOT EXISTS user_roles (
   KEY idx_user_roles_role_id (role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户角色关联表';
 
-CREATE TABLE IF NOT EXISTS permissions (
+CREATE TABLE IF NOT EXISTS `movie`.`permissions` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   code VARCHAR(100) NOT NULL,
   name VARCHAR(100) NOT NULL,
@@ -50,7 +51,7 @@ CREATE TABLE IF NOT EXISTS permissions (
   UNIQUE KEY uk_permissions_code (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='权限表';
 
-CREATE TABLE IF NOT EXISTS role_permissions (
+CREATE TABLE IF NOT EXISTS `movie`.`role_permissions` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   role_id BIGINT NOT NULL,
   permission_id BIGINT NOT NULL,
@@ -59,7 +60,7 @@ CREATE TABLE IF NOT EXISTS role_permissions (
   KEY idx_role_permissions_permission_id (permission_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='角色权限关联表';
 
-CREATE TABLE IF NOT EXISTS official_profiles (
+CREATE TABLE IF NOT EXISTS `movie`.`official_profiles` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   company_name VARCHAR(100) NOT NULL,
@@ -75,7 +76,7 @@ CREATE TABLE IF NOT EXISTS official_profiles (
   KEY idx_official_profiles_status (certification_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='电影官方用户资料表';
 
-CREATE TABLE IF NOT EXISTS movies (
+CREATE TABLE IF NOT EXISTS `movie`.`movies` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   title VARCHAR(100) NOT NULL,
   original_title VARCHAR(100) NULL,
@@ -105,7 +106,7 @@ CREATE TABLE IF NOT EXISTS movies (
   KEY idx_movies_avg_total_score (avg_total_score)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='电影表';
 
-CREATE TABLE IF NOT EXISTS official_movie_bindings (
+CREATE TABLE IF NOT EXISTS `movie`.`official_movie_bindings` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   official_user_id BIGINT NOT NULL,
   movie_id BIGINT NOT NULL,
@@ -115,7 +116,7 @@ CREATE TABLE IF NOT EXISTS official_movie_bindings (
   KEY idx_official_movie_bindings_movie_id (movie_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='电影商授权电影表';
 
-CREATE TABLE IF NOT EXISTS movie_ratings (
+CREATE TABLE IF NOT EXISTS `movie`.`movie_ratings` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   movie_id BIGINT NOT NULL,
   user_id BIGINT NOT NULL,
@@ -129,7 +130,7 @@ CREATE TABLE IF NOT EXISTS movie_ratings (
   KEY idx_movie_ratings_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='电影评分表';
 
-CREATE TABLE IF NOT EXISTS short_comments (
+CREATE TABLE IF NOT EXISTS `movie`.`short_comments` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   movie_id BIGINT NOT NULL,
   user_id BIGINT NOT NULL,
@@ -145,7 +146,7 @@ CREATE TABLE IF NOT EXISTS short_comments (
   KEY idx_short_comments_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='短评表';
 
-CREATE TABLE IF NOT EXISTS likes (
+CREATE TABLE IF NOT EXISTS `movie`.`likes` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   target_type VARCHAR(50) NOT NULL,
@@ -155,7 +156,7 @@ CREATE TABLE IF NOT EXISTS likes (
   KEY idx_likes_target (target_type, target_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='点赞表';
 
-CREATE TABLE IF NOT EXISTS reports (
+CREATE TABLE IF NOT EXISTS `movie`.`reports` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   reporter_id BIGINT NOT NULL,
   target_type VARCHAR(50) NOT NULL,
@@ -171,7 +172,7 @@ CREATE TABLE IF NOT EXISTS reports (
   KEY idx_reports_reporter_id (reporter_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='举报表';
 
-CREATE TABLE IF NOT EXISTS long_reviews (
+CREATE TABLE IF NOT EXISTS `movie`.`long_reviews` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   movie_id BIGINT NOT NULL,
   user_id BIGINT NOT NULL,
@@ -193,7 +194,7 @@ CREATE TABLE IF NOT EXISTS long_reviews (
   KEY idx_long_reviews_featured_status (is_featured, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='长评表';
 
-CREATE TABLE IF NOT EXISTS review_images (
+CREATE TABLE IF NOT EXISTS `movie`.`review_images` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   review_id BIGINT NOT NULL,
   image_url VARCHAR(500) NOT NULL,
@@ -202,7 +203,7 @@ CREATE TABLE IF NOT EXISTS review_images (
   KEY idx_review_images_review_id (review_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='长评图片表';
 
-CREATE TABLE IF NOT EXISTS review_replies (
+CREATE TABLE IF NOT EXISTS `movie`.`review_replies` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   review_id BIGINT NOT NULL,
   user_id BIGINT NOT NULL,
@@ -219,7 +220,7 @@ CREATE TABLE IF NOT EXISTS review_replies (
   KEY idx_review_replies_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='长评回复表';
 
-CREATE TABLE IF NOT EXISTS favorites (
+CREATE TABLE IF NOT EXISTS `movie`.`favorites` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   target_type VARCHAR(50) NOT NULL,
@@ -229,7 +230,7 @@ CREATE TABLE IF NOT EXISTS favorites (
   KEY idx_favorites_target (target_type, target_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='收藏表';
 
-CREATE TABLE IF NOT EXISTS news_articles (
+CREATE TABLE IF NOT EXISTS `movie`.`news_articles` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   title VARCHAR(150) NOT NULL,
   summary VARCHAR(500) NULL,
@@ -250,7 +251,7 @@ CREATE TABLE IF NOT EXISTS news_articles (
   KEY idx_news_articles_hot (is_hot)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='资讯表';
 
-CREATE TABLE IF NOT EXISTS news_relations (
+CREATE TABLE IF NOT EXISTS `movie`.`news_relations` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   news_id BIGINT NOT NULL,
   target_type VARCHAR(50) NOT NULL,
@@ -261,7 +262,7 @@ CREATE TABLE IF NOT EXISTS news_relations (
   KEY idx_news_relations_target (target_type, target_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='资讯关联表';
 
-CREATE TABLE IF NOT EXISTS interpretation_videos (
+CREATE TABLE IF NOT EXISTS `movie`.`interpretation_videos` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   movie_id BIGINT NOT NULL,
   title VARCHAR(150) NOT NULL,
@@ -280,7 +281,7 @@ CREATE TABLE IF NOT EXISTS interpretation_videos (
   KEY idx_interpretation_videos_submitter_id (submitter_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='解读视频表';
 
-CREATE TABLE IF NOT EXISTS merchandise (
+CREATE TABLE IF NOT EXISTS `movie`.`merchandise` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   movie_id BIGINT NOT NULL,
   name VARCHAR(150) NOT NULL,
@@ -301,7 +302,7 @@ CREATE TABLE IF NOT EXISTS merchandise (
   KEY idx_merchandise_submitter_id (submitter_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='电影周边商品表';
 
-CREATE TABLE IF NOT EXISTS audit_records (
+CREATE TABLE IF NOT EXISTS `movie`.`audit_records` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   target_type VARCHAR(50) NOT NULL,
   target_id BIGINT NOT NULL,
@@ -318,7 +319,7 @@ CREATE TABLE IF NOT EXISTS audit_records (
   KEY idx_audit_records_submitter_id (submitter_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='审核记录表';
 
-CREATE TABLE IF NOT EXISTS operation_logs (
+CREATE TABLE IF NOT EXISTS `movie`.`operation_logs` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   operator_id BIGINT NOT NULL,
   action VARCHAR(100) NOT NULL,
@@ -331,7 +332,7 @@ CREATE TABLE IF NOT EXISTS operation_logs (
   KEY idx_operation_logs_target (target_type, target_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='操作日志表';
 
-CREATE TABLE IF NOT EXISTS homepage_recommendations (
+CREATE TABLE IF NOT EXISTS `movie`.`homepage_recommendations` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   section_code VARCHAR(50) NOT NULL,
   target_type VARCHAR(50) NOT NULL,
@@ -349,7 +350,7 @@ CREATE TABLE IF NOT EXISTS homepage_recommendations (
   KEY idx_homepage_recommendations_target (target_type, target_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='首页推荐位表';
 
-CREATE TABLE IF NOT EXISTS ai_chat_sessions (
+CREATE TABLE IF NOT EXISTS `movie`.`ai_chat_sessions` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NULL,
   title VARCHAR(100) NULL,
@@ -358,7 +359,7 @@ CREATE TABLE IF NOT EXISTS ai_chat_sessions (
   KEY idx_ai_chat_sessions_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='AI 会话表';
 
-CREATE TABLE IF NOT EXISTS ai_chat_messages (
+CREATE TABLE IF NOT EXISTS `movie`.`ai_chat_messages` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   session_id BIGINT NOT NULL,
   role VARCHAR(30) NOT NULL,
