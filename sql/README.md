@@ -3,6 +3,7 @@
 ## 文件说明
 
 - `schema.sql`：数据库建表脚本，不包含删表语句，适合首次初始化云数据库。
+- `00_navicat_create_all_tables.sql`：Navicat 专用完整建表脚本，末尾会输出当前数据库表数量和表名。
 - `init-data.sql`：角色、权限和演示数据初始化脚本，已包含演示数据依赖表的兜底建表语句。
 - `init-homepage-data.sql`：首页推荐位演示数据初始化脚本，依赖 `homepage_recommendations` 等表已存在。
 - `update/`：后续数据库变更脚本目录。
@@ -10,8 +11,8 @@
 ## 执行顺序
 
 1. 确认数据库 `movie` 已存在。
-2. 执行 `schema.sql`。
-3. 如果使用阿里云 DMS 或 Navicat，建议先执行 `update/001_repair_missing_tables.sql`，确保初始化数据依赖的表都已存在。
+2. 如果使用 Navicat，优先执行 `00_navicat_create_all_tables.sql`。执行成功后，结果里应能看到约 25 张表。
+3. 如果不用 Navicat，也可以执行 `schema.sql`。如果使用阿里云 DMS 或 Navicat，建议再执行 `update/001_repair_missing_tables.sql`，确保初始化数据依赖的表都已存在。
 4. 执行 `init-data.sql`。
 5. 执行 `init-homepage-data.sql`。
 
@@ -51,7 +52,7 @@ No database selected
 1. 在左侧连接中展开 `movie` 连接。
 2. 找到并选中数据库 `movie`。
 3. 右键数据库 `movie`，选择“运行 SQL 文件”。
-4. 先运行 `schema.sql`，再运行 `update/001_repair_missing_tables.sql`，然后运行 `init-data.sql`，最后运行 `init-homepage-data.sql`。
+4. 先运行 `00_navicat_create_all_tables.sql`，确认结果窗口里能看到多张表，再运行 `init-data.sql`，最后运行 `init-homepage-data.sql`。
 
 脚本已经做了两层处理：
 
