@@ -44,3 +44,33 @@ a {
   padding: 20px;
 }
 
+/* 首页暗黑主题下拉菜单 */
+.user-dropdown-dark,
+.user-dropdown-dark.el-popper {
+  background: #1a1a2e !important;
+  border: 1px solid rgb(214 176 95 / 24%) !important;
+}
+
+.user-dropdown-dark .el-dropdown-menu {
+  background: #1a1a2e !important;
+}
+
+.user-dropdown-dark .el-dropdown-menu__item {
+  color: #d4c5a0 !important;
+  background: transparent !important;
+}
+
+.user-dropdown-dark .el-dropdown-menu__item:not(.is-disabled):hover,
+.user-dropdown-dark .el-dropdown-menu__item:not(.is-disabled):focus {
+  background: rgb(214 176 95 / 14%) !important;
+  color: #f3d58c !important;
+}
+
+.user-dropdown-dark .el-dropdown-menu__item.is-disabled {
+  color: #a09070 !important;
+}
+
+.user-dropdown-dark .el-dropdown-menu__item--divided {
+  border-top-color: rgb(214 176 95 / 20%) !important;
+}
+

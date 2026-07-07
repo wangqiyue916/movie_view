@@ -3,6 +3,38 @@ SET time_zone = '+08:00';
 
 USE `movie`;
 
+-- ============================================================
+-- auth 模块：用户与角色表（潘玺名负责）
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `movie`.`users` (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  nickname VARCHAR(50) NOT NULL,
+  avatar_url VARCHAR(500) NULL,
+  email VARCHAR(100) NULL,
+  phone VARCHAR(30) NULL,
+  status VARCHAR(30) NOT NULL DEFAULT 'NORMAL',
+  last_login_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  UNIQUE KEY uk_users_username (username),
+  KEY idx_users_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户表';
+
+CREATE TABLE IF NOT EXISTS `movie`.`user_roles` (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  role_id BIGINT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_user_roles_user_role (user_id, role_id),
+  KEY idx_user_roles_role_id (role_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户角色关联表';
+
+-- ============================================================
+
 CREATE TABLE IF NOT EXISTS `movie`.`roles` (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   code VARCHAR(50) NOT NULL,
@@ -196,12 +228,37 @@ CREATE TABLE IF NOT EXISTS `movie`.`ai_chat_messages` (
   KEY idx_ai_chat_messages_related (related_type, related_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='AI chat messages';
 
+-- ============================================================
+-- auth 模块：种子测试用户（密码均为 123456）
+-- MySQL 内置 SHA2() 与 Java MessageDigest SHA-256 输出完全一致
+-- ============================================================
+
+-- 先清理旧数据（避免之前错误哈希的残留）
+DELETE FROM `movie`.`user_roles` WHERE user_id IN (SELECT id FROM `movie`.`users` WHERE username IN ('user','official','admin','super_admin'));
+DELETE FROM `movie`.`users` WHERE username IN ('user','official','admin','super_admin');
+
+INSERT INTO `movie`.`users` (username, password_hash, nickname, status) VALUES
+('user',          SHA2('123456', 256), '普通用户',   'NORMAL'),
+('official',      SHA2('123456', 256), '电影官方',   'NORMAL'),
+('admin',         SHA2('123456', 256), '管理员',     'NORMAL'),
+('super_admin',   SHA2('123456', 256), '超级管理员', 'NORMAL');
+
+-- ============================================================
+
 INSERT INTO `movie`.`roles` (code, name, description) VALUES
 ('USER', '普通用户', '前台普通用户'),
 ('OFFICIAL', '电影官方用户', '电影商或官方投稿用户'),
 ('ADMIN', '管理员', '内容审核和运营管理'),
 ('SUPER_ADMIN', '超级管理员', '系统最高权限')
 ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description);
+
+-- 给种子用户分配角色
+INSERT IGNORE INTO `movie`.`user_roles` (user_id, role_id)
+SELECT u.id, r.id FROM `movie`.`users` u JOIN `movie`.`roles` r
+WHERE (u.username = 'user'         AND r.code = 'USER')
+   OR (u.username = 'official'     AND r.code = 'OFFICIAL')
+   OR (u.username = 'admin'        AND r.code = 'ADMIN')
+   OR (u.username = 'super_admin'  AND r.code = 'SUPER_ADMIN');
 
 INSERT INTO `movie`.`permissions` (code, name, type, description) VALUES
 ('movie:rating:create', '提交电影评分', 'ACTION', '普通用户提交或更新电影评分'),

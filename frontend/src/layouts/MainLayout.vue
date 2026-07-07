@@ -9,8 +9,7 @@
         <router-link to="/merchandise">周边</router-link>
       </nav>
       <div class="actions">
-        <UserDropdown v-if="userStore.isLogin" />
-        <router-link v-else to="/login">登录</router-link>
+        <UserDropdown :dark="isHomePage" />
       </div>
     </header>
     <main class="main-content">
@@ -22,12 +21,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/userStore'
 import UserDropdown from '@/components/common/UserDropdown.vue'
 
 const route = useRoute()
 const router = useRouter()
-const userStore = useUserStore()
 
 const isHomePage = computed(() => route.name === 'HomePage')
 
@@ -71,7 +68,6 @@ function handleNewsClick(e: Event) {
 
 .actions {
   display: flex;
-  align-items: center;
   gap: 16px;
   margin-left: auto;
   color: #2563eb;
