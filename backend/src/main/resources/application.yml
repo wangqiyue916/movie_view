@@ -6,8 +6,8 @@ spring:
     name: movie-review-system
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:movie}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:root}
+    url: jdbc:mysql://${DB_HOST:dpshmy-nsoibg00vy6m3nxv-pub.proxy.dms.aliyuncs.com}:${DB_PORT:3306}/${DB_NAME:movie}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&defaultAuthenticationPlugin=mysql_native_password
+    username: ${DB_USERNAME:uQ0sgL2iNbfkEirFiDrsqOZo}
     password: ${DB_PASSWORD:}
     hikari:
       initialization-fail-timeout: 0
