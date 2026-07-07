@@ -40,9 +40,19 @@ public class NewsController {
         IPage<NewsArticle> result = newsService.getNewsList(page, pageSize, keyword, category, movieId);
         List<NewsArticle> records = result.getRecords();
 
-        // 数据库无数据时返回 Mock 数据
-        if (records.isEmpty() && (keyword == null || keyword.isBlank()) && category == null && movieId == null) {
+        // 数据库无数据时使用 Mock，并支持关键词和分类筛选
+        if (records.isEmpty()) {
             records = buildMockNewsList();
+            if (keyword != null && !keyword.isBlank()) {
+                records = records.stream()
+                        .filter(n -> n.getTitle().contains(keyword) || n.getSummary().contains(keyword))
+                        .toList();
+            }
+            if (category != null && !category.isBlank()) {
+                records = records.stream()
+                        .filter(n -> category.equals(n.getCategory()))
+                        .toList();
+            }
         }
 
         return ApiResponse.success(new PageResult<>(
@@ -79,16 +89,36 @@ public class NewsController {
     @GetMapping("/{newsId}/relations")
     public ApiResponse<List<NewsRelation>> relations(@PathVariable Long newsId) {
         List<NewsRelation> rels = newsService.getNewsRelations(newsId);
-        if (rels.isEmpty() && newsId == 1) {
-            NewsRelation r = new NewsRelation();
-            r.setId(1L);
-            r.setNewsId(1L);
-            r.setTargetType("MOVIE");
-            r.setTargetId(1L);
-            r.setTargetName("星际穿越");
-            return ApiResponse.success(List.of(r));
+        if (rels.isEmpty() && newsId >= 1 && newsId <= 8) {
+            rels = buildMockRelations(newsId.intValue());
         }
         return ApiResponse.success(rels);
+    }
+
+    private List<NewsRelation> buildMockRelations(int newsId) {
+        String[][] mock = {
+            {"MOVIE", "1", "星际穿越"},
+            {"ACTOR", "1", "马修·麦康纳"},
+            {"DIRECTOR", "1", "克里斯托弗·诺兰"},
+        };
+        String[][] mock2 = {
+            {"MOVIE", "2", "盗梦空间"},
+            {"ACTOR", "2", "莱昂纳多·迪卡普里奥"},
+            {"DIRECTOR", "2", "克里斯托弗·诺兰"},
+        };
+        String[][] data = (newsId % 2 == 1) ? mock : mock2;
+
+        List<NewsRelation> list = new ArrayList<>();
+        for (int i = 0; i < data.length; i++) {
+            NewsRelation r = new NewsRelation();
+            r.setId((long) (i + 1));
+            r.setNewsId((long) newsId);
+            r.setTargetType(data[i][0]);
+            r.setTargetId(Long.parseLong(data[i][1]));
+            r.setTargetName(data[i][2]);
+            list.add(r);
+        }
+        return list;
     }
 
     private List<NewsArticle> buildMockNewsList() {

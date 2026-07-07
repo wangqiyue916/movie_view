@@ -53,18 +53,15 @@
     </section>
 
     <!-- 电影资讯 -->
-    <section class="content-section">
+    <section id="news-section" class="content-section">
       <div class="section-heading">
         <span></span>
         <h2>电影资讯</h2>
-        <div class="news-controls" aria-label="电影资讯浏览控制">
-          <button type="button" aria-label="向左浏览电影资讯" @click="scrollNews(-1)">‹</button>
-          <button type="button" aria-label="向右浏览电影资讯" @click="scrollNews(1)">›</button>
-        </div>
+        <router-link to="/news" class="news-more-link">更多 ›</router-link>
       </div>
-      <div ref="newsScroller" class="news-list">
+      <div class="news-grid-static">
         <router-link
-          v-for="news in latestNews"
+          v-for="news in displayedNews"
           :key="news.id"
           :to="`/news/${news.id}`"
           class="news-card"
@@ -134,7 +131,6 @@ const showcaseItems = ref([
 ])
 
 const activeIndex = ref(0)
-const newsScroller = ref<HTMLElement | null>(null)
 let timer: number | undefined
 
 // API 数据
@@ -164,14 +160,14 @@ const movieGroups = computed(() => [
     title: '高分推荐',
     movies: topRatedMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
   },
+  {
+    title: '最新上映',
+    movies: latestMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
+  },
 ])
 
-const scrollNews = (direction: number) => {
-  newsScroller.value?.scrollBy({
-    left: direction * 420,
-    behavior: 'smooth',
-  })
-}
+// 首页固定展示的资讯数量（取前4条）
+const displayedNews = computed(() => latestNews.value.slice(0, 4))
 
 // 获取首页数据
 async function fetchHomeData() {
@@ -493,6 +489,26 @@ onBeforeUnmount(() => {
   transform: translateY(-1px);
 }
 
+.news-more-link {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid rgb(214 176 95 / 32%);
+  border-radius: 6px;
+  color: #e8c16d;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.news-more-link:hover {
+  border-color: #d6b05f;
+  background: rgb(214 176 95 / 13%);
+}
+
 .movie-category-list {
   display: grid;
   gap: 22px;
@@ -568,6 +584,12 @@ onBeforeUnmount(() => {
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.news-grid-static {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
 }
 
 .news-list {

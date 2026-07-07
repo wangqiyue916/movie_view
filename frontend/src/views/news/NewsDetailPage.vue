@@ -46,14 +46,40 @@
 
       <div v-if="relations.length > 0" class="article-relations">
         <h3>关联内容</h3>
-        <div class="relations-list">
-          <span
-            v-for="rel in relations"
-            :key="rel.id"
-            class="relation-tag"
-          >
-            {{ rel.targetName }}
-          </span>
+        <div class="relations-groups">
+          <div v-if="movieRels.length > 0" class="relation-group">
+            <span class="relation-type-label">🎬 关联电影</span>
+            <div class="relations-list">
+              <router-link
+                v-for="rel in movieRels"
+                :key="rel.id"
+                :to="`/movies/${rel.targetId}`"
+                class="relation-tag movie-tag relation-link"
+              >{{ rel.targetName }}</router-link>
+            </div>
+          </div>
+          <div v-if="directorRels.length > 0" class="relation-group">
+            <span class="relation-type-label">🎥 导演</span>
+            <div class="relations-list">
+              <router-link
+                v-for="rel in directorRels"
+                :key="rel.id"
+                :to="`/movies?director=${encodeURIComponent(rel.targetName)}`"
+                class="relation-tag director-tag relation-link"
+              >{{ rel.targetName }}</router-link>
+            </div>
+          </div>
+          <div v-if="actorRels.length > 0" class="relation-group">
+            <span class="relation-type-label">👤 演员</span>
+            <div class="relations-list">
+              <router-link
+                v-for="rel in actorRels"
+                :key="rel.id"
+                :to="`/movies?actor=${encodeURIComponent(rel.targetName)}`"
+                class="relation-tag actor-tag relation-link"
+              >{{ rel.targetName }}</router-link>
+            </div>
+          </div>
         </div>
       </div>
     </article>
@@ -104,6 +130,10 @@ function handleShare() {
     prompt('复制以下链接分享：', url)
   })
 }
+
+const movieRels = computed(() => relations.value.filter(r => r.targetType === 'MOVIE'))
+const directorRels = computed(() => relations.value.filter(r => r.targetType === 'DIRECTOR'))
+const actorRels = computed(() => relations.value.filter(r => r.targetType === 'ACTOR'))
 
 const renderedContent = computed(() => {
   if (!news.value?.content) return ''
@@ -281,6 +311,26 @@ onMounted(async () => {
   gap: 8px;
 }
 
+.relations-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.relation-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.relation-type-label {
+  color: #8a7b60;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .relation-tag {
   padding: 5px 16px;
   border: 1px solid rgb(214 176 95 / 28%);
@@ -288,6 +338,21 @@ onMounted(async () => {
   font-size: 13px;
   color: #c6b78f;
   background: rgb(255 255 255 / 4%);
+}
+
+.movie-tag {
+  border-color: rgb(214 176 95 / 36%);
+  color: #e8c16d;
+}
+
+.director-tag {
+  border-color: rgb(180 150 120 / 36%);
+  color: #cbb98f;
+}
+
+.actor-tag {
+  border-color: rgb(160 140 110 / 36%);
+  color: #baa87e;
 }
 
 .article-actions {
