@@ -1,5 +1,6 @@
 <template>
   <div class="home-page">
+    <!-- 轮播展示区 -->
     <section class="showcase" aria-label="热门展示">
       <div class="showcase-frame">
         <article
@@ -29,12 +30,12 @@
       </div>
     </section>
 
+    <!-- 热门电影 -->
     <section class="content-section movie-section">
       <div class="section-heading">
         <span></span>
         <h2>热门电影</h2>
       </div>
-
       <div class="movie-category-list">
         <section v-for="group in movieGroups" :key="group.title" class="movie-category">
           <h3>{{ group.title }}</h3>
@@ -44,13 +45,14 @@
                 <img :src="movie.poster" :alt="movie.title" />
                 <strong>{{ movie.score }}</strong>
               </div>
-              <p>{{ movie.year }}/{{ movie.title }}</p>
+              <p>{{ movie.title }}</p>
             </article>
           </div>
         </section>
       </div>
     </section>
 
+    <!-- 电影资讯 -->
     <section class="content-section">
       <div class="section-heading">
         <span></span>
@@ -61,24 +63,30 @@
         </div>
       </div>
       <div ref="newsScroller" class="news-list">
-        <article v-for="news in newsItems" :key="news.title" class="news-card">
-          <img :src="news.cover" :alt="news.title" />
+        <router-link
+          v-for="news in latestNews"
+          :key="news.id"
+          :to="`/news/${news.id}`"
+          class="news-card"
+        >
+          <img :src="news.coverUrl || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'" :alt="news.title" />
           <div>
             <span>{{ news.category }}</span>
             <h3>{{ news.title }}</h3>
             <p>{{ news.summary }}</p>
           </div>
-        </article>
+        </router-link>
       </div>
     </section>
 
+    <!-- 优质长评 -->
     <section class="content-section reviews-section">
       <div class="section-heading">
         <span></span>
         <h2>优质长评</h2>
       </div>
       <div class="review-list">
-        <article v-for="review in reviewItems" :key="review.title" class="review-card">
+        <article v-for="review in featuredReviews" :key="review.title" class="review-card">
           <h3>{{ review.title }}</h3>
           <p>{{ review.excerpt }}</p>
           <div class="review-meta">
@@ -95,7 +103,9 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { homeApi, type HomeData, type NewsArticle, type ReviewItem, type MovieItem } from '@/api/homeApi'
 
+// 轮播数据（使用资讯轮播图）
 const showcaseItems = [
   {
     kicker: '今日热映',
@@ -123,152 +133,15 @@ const showcaseItems = [
   },
 ]
 
-const posterImages = [
-  'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=500&q=85',
-]
-
-const movieGroups = [
-  {
-    title: '近期热门',
-    movies: [
-      { year: '2026', title: '星海回响', score: '8.4', poster: posterImages[0] },
-      { year: '2025', title: '银幕之夜', score: '8.1', poster: posterImages[1] },
-      { year: '2025', title: '梦境边缘', score: '8.6', poster: posterImages[2] },
-      { year: '2024', title: '午夜剧场', score: '7.9', poster: posterImages[3] },
-      { year: '2024', title: '远行者', score: '8.2', poster: posterImages[4] },
-      { year: '2023', title: '最后一幕', score: '7.8', poster: posterImages[5] },
-    ],
-  },
-  {
-    title: '高分推荐',
-    movies: [
-      { year: '2014', title: '星际穿越', score: '9.4', poster: posterImages[0] },
-      { year: '2010', title: '盗梦空间', score: '9.3', poster: posterImages[2] },
-      { year: '1994', title: '光影岁月', score: '9.2', poster: posterImages[6] },
-      { year: '2008', title: '暗夜骑士', score: '9.0', poster: posterImages[7] },
-      { year: '2023', title: '流浪地球2', score: '8.3', poster: posterImages[1] },
-    ],
-  },
-  {
-    title: '华语新片',
-    movies: [
-      { year: '2026', title: '山海入梦', score: '7.6', poster: posterImages[4] },
-      { year: '2025', title: '霓虹归途', score: '7.8', poster: posterImages[5] },
-      { year: '2025', title: '热烈回声', score: '7.4', poster: posterImages[6] },
-      { year: '2024', title: '城市边界', score: '7.7', poster: posterImages[7] },
-      { year: '2024', title: '银河信使', score: '8.0', poster: posterImages[0] },
-    ],
-  },
-  {
-    title: '欧美新片',
-    movies: [
-      { year: '2026', title: '蓝色荒原', score: '7.5', poster: posterImages[3] },
-      { year: '2025', title: '沉默档案', score: '8.0', poster: posterImages[2] },
-      { year: '2025', title: '北境列车', score: '7.3', poster: posterImages[1] },
-      { year: '2024', title: '黄金剧院', score: '7.9', poster: posterImages[5] },
-      { year: '2024', title: '风暴之后', score: '7.2', poster: posterImages[4] },
-    ],
-  },
-  {
-    title: '日韩新片',
-    movies: [
-      { year: '2026', title: '明天也上班', score: '7.3', poster: posterImages[6] },
-      { year: '2025', title: '婚姻之后', score: '7.1', poster: posterImages[7] },
-      { year: '2025', title: '最后的男孩', score: '7.6', poster: posterImages[4] },
-      { year: '2024', title: '名斗实况', score: '7.4', poster: posterImages[5] },
-      { year: '2024', title: '铁拳学园', score: '7.0', poster: posterImages[3] },
-    ],
-  },
-]
-
-const newsItems = [
-  {
-    category: '新片动态',
-    title: '暑期档科幻电影热度持续升温',
-    summary: '多部科幻题材影片带动观影讨论，视觉效果、叙事表达与人物塑造成为关注焦点。',
-    cover: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85',
-  },
-  {
-    category: '平台活动',
-    title: '经典高分电影长评征集活动开启',
-    summary: '平台将根据点赞数、收藏数和回复数推荐优质长评，鼓励更深入的电影讨论。',
-    cover: 'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=900&q=85',
-  },
-  {
-    category: '票房观察',
-    title: '本周口碑片单带动二刷热度',
-    summary: '高分影片的长线表现正在回暖，讨论度集中在角色关系、主题表达和视听风格。',
-    cover: 'https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=900&q=85',
-  },
-  {
-    category: '幕后花絮',
-    title: '导演特辑公开多场关键戏拍摄细节',
-    summary: '主创团队分享场景搭建、镜头调度和音乐设计，让观众更深入理解影片创作过程。',
-    cover: 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=85',
-  },
-  {
-    category: '演员动态',
-    title: '多位主演新片计划进入筹备阶段',
-    summary: '演员阵容、角色设定和类型方向陆续曝光，相关话题持续登上讨论榜。',
-    cover: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=85',
-  },
-  {
-    category: '获奖信息',
-    title: '年度电影奖项公布入围名单',
-    summary: '剧情片、科幻片和动画片竞争激烈，摄影、美术和原创音乐单元关注度提升。',
-    cover: 'https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=900&q=85',
-  },
-  {
-    category: '行业观察',
-    title: '流媒体与院线窗口期继续调整',
-    summary: '多平台尝试新的发行节奏，观众观影习惯和影片宣发策略都在发生变化。',
-    cover: 'https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=900&q=85',
-  },
-  {
-    category: '周边资讯',
-    title: '热门电影主题周边开启预售',
-    summary: '海报、徽章、角色模型和限定文创陆续上架，收藏向商品受到影迷关注。',
-    cover: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=900&q=85',
-  },
-]
-
-const reviewItems = [
-  {
-    title: '穿越星际之后，仍然回到人的情感',
-    excerpt: '它最动人的地方，是把宏大的宇宙尺度和具体的人之间重新连接起来。那些看似关于时间和维度的设定，最后都落回了一次告别、一次等待和一次相信。',
-    author: '影评人 Mori',
-    date: '2026-07-06',
-    likes: 32,
-    comments: 5,
-  },
-  {
-    title: '梦境不是谜题，而是欲望的回声',
-    excerpt: '真正让人反复回看的，并不只是结构，还有每一层梦境背后未被说破的执念。影片的精巧之处，在于它把动作片的节奏和心理困境缝在了一起。',
-    author: '用户 北辰',
-    date: '2026-07-05',
-    likes: 24,
-    comments: 7,
-  },
-  {
-    title: '灾难片里的群像，为什么仍然能打动人',
-    excerpt: '当宏大工程、末日危机和个体选择并置时，电影真正要讨论的不是奇观本身，而是人在巨大系统面前如何保留自己的重量。',
-    author: '用户 山止川行',
-    date: '2026-07-04',
-    likes: 18,
-    comments: 3,
-  },
-]
-
 const activeIndex = ref(0)
 const newsScroller = ref<HTMLElement | null>(null)
 let timer: number | undefined
+
+// API 数据
+const latestNews = ref<NewsArticle[]>([])
+const hotMovies = ref<MovieItem[]>([])
+const topRatedMovies = ref<MovieItem[]>([])
+const featuredReviews = ref<ReviewItem[]>([])
 
 const total = computed(() => showcaseItems.length)
 
@@ -280,6 +153,18 @@ const getSlideClass = (index: number) => {
   return 'is-back'
 }
 
+// 组装电影分组
+const movieGroups = computed(() => [
+  {
+    title: '近期热门',
+    movies: hotMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
+  },
+  {
+    title: '高分推荐',
+    movies: topRatedMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
+  },
+])
+
 const scrollNews = (direction: number) => {
   newsScroller.value?.scrollBy({
     left: direction * 420,
@@ -287,7 +172,21 @@ const scrollNews = (direction: number) => {
   })
 }
 
+// 获取首页数据
+async function fetchHomeData() {
+  try {
+    const data: HomeData = await homeApi.getHomeData()
+    latestNews.value = data.latestNews || []
+    hotMovies.value = data.hotMovies || []
+    topRatedMovies.value = data.topRatedMovies || []
+    featuredReviews.value = data.featuredReviews || []
+  } catch {
+    // 接口失败时使用空数据，页面会优雅降级
+  }
+}
+
 onMounted(() => {
+  fetchHomeData()
   timer = window.setInterval(() => {
     activeIndex.value = (activeIndex.value + 1) % total.value
   }, 10000)
@@ -308,10 +207,9 @@ onBeforeUnmount(() => {
 .home-page {
   position: relative;
   isolation: isolate;
-  width: min(1280px, max(960px, calc(100% - 420px)));
+  width: 100%;
   min-height: calc(100vh - 64px);
-  margin: 0 auto;
-  padding: 36px 0 72px;
+  padding: 36px max(22px, calc((100vw - 1280px) / 2)) 72px;
   color: #f7edd5;
   background:
     radial-gradient(circle at 8% 18%, rgb(214 176 95 / 14%), transparent 24%),
@@ -698,6 +596,8 @@ onBeforeUnmount(() => {
   min-height: 112px;
   overflow: hidden;
   scroll-snap-align: start;
+  color: inherit;
+  text-decoration: none;
 }
 
 .news-card img {
@@ -764,10 +664,6 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 1100px) {
-  .home-page {
-    width: min(100% - 56px, 1040px);
-  }
-
   .news-list {
     grid-auto-columns: minmax(340px, 78vw);
   }
@@ -779,7 +675,7 @@ onBeforeUnmount(() => {
 
 @media (max-width: 900px) {
   .home-page {
-    width: calc(100% - 36px);
+    padding-inline: 18px;
   }
 
   .showcase {
