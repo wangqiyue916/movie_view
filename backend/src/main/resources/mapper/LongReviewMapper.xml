@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.movie.longreview.mapper.LongReviewMapper">
+
+    <resultMap id="reviewVOMap" type="com.example.movie.longreview.vo.LongReviewVO">
+        <id column="id" property="id"/>
+        <result column="movie_id" property="movieId"/>
+        <result column="movie_title" property="movieTitle"/>
+        <result column="user_id" property="userId"/>
+        <result column="author_nickname" property="authorNickname"/>
+        <result column="author_avatar" property="authorAvatar"/>
+        <result column="title" property="title"/>
+        <result column="content_md" property="contentMd"/>
+        <result column="cover_url" property="coverUrl"/>
+        <result column="status" property="status"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="favorite_count" property="favoriteCount"/>
+        <result column="reply_count" property="replyCount"/>
+        <result column="is_featured" property="isFeatured"/>
+        <result column="featured_at" property="featuredAt"/>
+        <result column="liked" property="liked"/>
+        <result column="favorited" property="favorited"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <resultMap id="featuredVOMap" type="com.example.movie.longreview.vo.FeaturedReviewVO">
+        <id column="id" property="id"/>
+        <result column="movie_id" property="movieId"/>
+        <result column="movie_title" property="movieTitle"/>
+        <result column="movie_poster" property="moviePoster"/>
+        <result column="user_id" property="userId"/>
+        <result column="author_nickname" property="authorNickname"/>
+        <result column="author_avatar" property="authorAvatar"/>
+        <result column="title" property="title"/>
+        <result column="summary" property="summary"/>
+        <result column="cover_url" property="coverUrl"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="favorite_count" property="favoriteCount"/>
+        <result column="reply_count" property="replyCount"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="hot_score" property="hotScore"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <select id="selectReviewPage" resultMap="reviewVOMap">
+        SELECT
+            lr.*,
+            m.title AS movie_title,
+            u.nickname AS author_nickname,
+            u.avatar_url AS author_avatar,
+            CASE WHEN lk.id IS NOT NULL THEN 1 ELSE 0 END AS liked,
+            CASE WHEN fv.id IS NOT NULL THEN 1 ELSE 0 END AS favorited
+        FROM long_reviews lr
+        LEFT JOIN movies m ON lr.movie_id = m.id
+        LEFT JOIN users u ON lr.user_id = u.id
+        LEFT JOIN likes lk ON lk.target_type = 'LONG_REVIEW' AND lk.target_id = lr.id AND lk.user_id = #{currentUserId}
+        LEFT JOIN favorites fv ON fv.target_type = 'LONG_REVIEW' AND fv.target_id = lr.id AND fv.user_id = #{currentUserId}
+        WHERE lr.deleted_at IS NULL
+        AND lr.status = 'ONLINE'
+        <if test="movieId != null">
+            AND lr.movie_id = #{movieId}
+        </if>
+        <choose>
+            <when test="sortBy == 'hot'">
+                ORDER BY (lr.like_count * 1 + lr.view_count * 0.1 + lr.reply_count * 2 + lr.favorite_count * 3) DESC
+            </when>
+            <otherwise>
+                ORDER BY lr.created_at DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectReviewById" resultMap="reviewVOMap">
+        SELECT
+            lr.*,
+            m.title AS movie_title,
+            u.nickname AS author_nickname,
+            u.avatar_url AS author_avatar,
+            CASE WHEN lk.id IS NOT NULL THEN 1 ELSE 0 END AS liked,
+            CASE WHEN fv.id IS NOT NULL THEN 1 ELSE 0 END AS favorited
+        FROM long_reviews lr
+        LEFT JOIN movies m ON lr.movie_id = m.id
+        LEFT JOIN users u ON lr.user_id = u.id
+        LEFT JOIN likes lk ON lk.target_type = 'LONG_REVIEW' AND lk.target_id = lr.id AND lk.user_id = #{currentUserId}
+        LEFT JOIN favorites fv ON fv.target_type = 'LONG_REVIEW' AND fv.target_id = lr.id AND fv.user_id = #{currentUserId}
+        WHERE lr.id = #{id}
+        AND lr.deleted_at IS NULL
+    </select>
+
+    <select id="selectFeaturedReviews" resultMap="featuredVOMap">
+        SELECT
+            lr.id, lr.movie_id, lr.user_id, lr.title,
+            SUBSTRING(lr.content_md, 1, 200) AS summary,
+            lr.cover_url, lr.like_count, lr.favorite_count, lr.reply_count, lr.view_count,
+            (lr.like_count * 1 + lr.view_count * 0.1 + lr.reply_count * 2 + lr.favorite_count * 3) AS hot_score,
+            lr.created_at,
+            m.title AS movie_title,
+            m.poster_url AS movie_poster,
+            u.nickname AS author_nickname,
+            u.avatar_url AS author_avatar
+        FROM long_reviews lr
+        LEFT JOIN movies m ON lr.movie_id = m.id
+        LEFT JOIN users u ON lr.user_id = u.id
+        WHERE lr.deleted_at IS NULL
+        AND lr.status = 'ONLINE'
+        AND lr.is_featured = 1
+        ORDER BY lr.featured_at DESC, hot_score DESC
+    </select>
+
+    <select id="selectMyReviews" resultMap="reviewVOMap">
+        SELECT
+            lr.*,
+            m.title AS movie_title,
+            u.nickname AS author_nickname,
+            u.avatar_url AS author_avatar,
+            CASE WHEN lk.id IS NOT NULL THEN 1 ELSE 0 END AS liked,
+            CASE WHEN fv.id IS NOT NULL THEN 1 ELSE 0 END AS favorited
+        FROM long_reviews lr
+        LEFT JOIN movies m ON lr.movie_id = m.id
+        LEFT JOIN users u ON lr.user_id = u.id
+        LEFT JOIN likes lk ON lk.target_type = 'LONG_REVIEW' AND lk.target_id = lr.id AND lk.user_id = #{userId}
+        LEFT JOIN favorites fv ON fv.target_type = 'LONG_REVIEW' AND fv.target_id = lr.id AND fv.user_id = #{userId}
+        WHERE lr.deleted_at IS NULL
+        AND lr.user_id = #{userId}
+        ORDER BY lr.created_at DESC
+    </select>
+
+</mapper>
