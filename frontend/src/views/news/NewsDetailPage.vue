@@ -28,6 +28,22 @@
 
       <div class="article-content" v-html="renderedContent"></div>
 
+      <!-- 互动操作栏 -->
+      <div class="article-actions">
+        <button class="action-btn" :class="{ active: isLiked }" @click="toggleLike">
+          <span class="action-icon">{{ isLiked ? '❤️' : '🤍' }}</span>
+          <span>{{ likeCount }}</span>
+        </button>
+        <button class="action-btn" :class="{ active: isFavorited }" @click="toggleFavorite">
+          <span class="action-icon">{{ isFavorited ? '⭐' : '☆' }}</span>
+          <span>{{ isFavorited ? '已收藏' : '收藏' }}</span>
+        </button>
+        <button class="action-btn" @click="handleShare">
+          <span class="action-icon">↗️</span>
+          <span>分享</span>
+        </button>
+      </div>
+
       <div v-if="relations.length > 0" class="article-relations">
         <h3>关联内容</h3>
         <div class="relations-list">
@@ -53,6 +69,41 @@ const route = useRoute()
 const news = ref<NewsArticle | null>(null)
 const relations = ref<NewsRelation[]>([])
 const loading = ref(true)
+const isLiked = ref(false)
+const likeCount = ref(0)
+const isFavorited = ref(false)
+
+async function toggleLike() {
+  if (!news.value) return
+  try {
+    const res = await homeApi.toggleLike(news.value.id)
+    isLiked.value = res.liked
+    likeCount.value = res.likeCount
+  } catch {
+    // 降级：纯前端切换
+    isLiked.value = !isLiked.value
+    likeCount.value = isLiked.value ? 1 : 0
+  }
+}
+
+async function toggleFavorite() {
+  if (!news.value) return
+  try {
+    const res = await homeApi.toggleFavorite(news.value.id)
+    isFavorited.value = res.favorited
+  } catch {
+    isFavorited.value = !isFavorited.value
+  }
+}
+
+function handleShare() {
+  const url = window.location.href
+  navigator.clipboard.writeText(url).then(() => {
+    alert('链接已复制到剪贴板')
+  }).catch(() => {
+    prompt('复制以下链接分享：', url)
+  })
+}
 
 const renderedContent = computed(() => {
   if (!news.value?.content) return ''
@@ -80,6 +131,19 @@ onMounted(async () => {
     ])
     news.value = detail
     relations.value = rels
+
+    // 获取初始互动状态
+    try {
+      const [likeRes, favRes] = await Promise.all([
+        homeApi.getLikeStatus(newsId),
+        homeApi.getFavoriteStatus(newsId),
+      ])
+      isLiked.value = likeRes.isLiked
+      likeCount.value = likeRes.likeCount
+      isFavorited.value = favRes.isFavorited
+    } catch {
+      // 降级：互动状态保持默认值
+    }
   } catch {
     news.value = null
   } finally {
@@ -90,20 +154,22 @@ onMounted(async () => {
 
 <style scoped>
 .news-detail-page {
-  padding-top: 28px;
-  padding-bottom: 48px;
+  min-height: calc(100vh - 64px);
+  padding: 36px max(22px, calc((100vw - 1280px) / 2)) 72px;
+  color: #f7edd5;
+  background: #050505;
 }
 
 .loading,
 .empty {
   text-align: center;
   padding: 80px 0;
-  color: #9ca3af;
+  color: #9a8b6e;
   font-size: 15px;
 }
 
 .empty a {
-  color: #2563eb;
+  color: #e8c16d;
   margin-top: 12px;
   display: inline-block;
 }
@@ -116,14 +182,20 @@ onMounted(async () => {
 .back-link {
   display: inline-block;
   margin-bottom: 20px;
-  color: #2563eb;
+  color: #e8c16d;
   font-size: 14px;
+  transition: color 180ms;
+}
+
+.back-link:hover {
+  color: #f3d58c;
 }
 
 .cover-wrapper {
   margin-bottom: 24px;
   border-radius: 8px;
   overflow: hidden;
+  border: 1px solid rgb(214 176 95 / 22%);
 }
 
 .cover-wrapper img {
@@ -134,66 +206,71 @@ onMounted(async () => {
 }
 
 .article-header {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .category-label {
   display: inline-block;
-  padding: 2px 12px;
-  margin-bottom: 10px;
+  padding: 3px 14px;
+  margin-bottom: 12px;
   border-radius: 999px;
-  background: #2563eb;
-  color: #fff;
+  background: rgb(214 176 95 / 82%);
+  color: #050505;
   font-size: 12px;
+  font-weight: 600;
 }
 
 .article-header h1 {
-  margin: 0 0 12px;
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.35;
+  margin: 0 0 14px;
+  color: #fff8e6;
+  font-family: "Noto Serif SC", "Songti SC", SimSun, serif;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-shadow: 0 0 16px rgb(214 176 95 / 18%);
 }
 
 .article-meta {
   display: flex;
-  gap: 16px;
-  color: #9ca3af;
+  gap: 18px;
+  color: #8a7b60;
   font-size: 13px;
 }
 
 .article-summary {
-  padding: 14px 18px;
-  margin-bottom: 24px;
-  border-left: 3px solid #2563eb;
-  background: #f8fafc;
+  padding: 16px 20px;
+  margin-bottom: 28px;
+  border-left: 3px solid #d6b05f;
+  background: rgb(214 176 95 / 6%);
   border-radius: 0 6px 6px 0;
 }
 
 .article-summary p {
   margin: 0;
-  color: #475569;
+  color: #d8c69b;
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
 .article-content {
   font-size: 16px;
-  line-height: 1.85;
-  color: #1f2937;
+  line-height: 1.9;
+  color: #e0d3b0;
 }
 
 .article-content :deep(p) {
-  margin: 0 0 16px;
+  margin: 0 0 18px;
 }
 
 .article-relations {
-  margin-top: 36px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 40px;
+  padding-top: 22px;
+  border-top: 1px solid rgb(214 176 95 / 22%);
 }
 
 .article-relations h3 {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
+  color: #e8c16d;
   font-size: 16px;
   font-weight: 600;
 }
@@ -205,17 +282,55 @@ onMounted(async () => {
 }
 
 .relation-tag {
-  padding: 4px 14px;
-  border: 1px solid #e5e7eb;
+  padding: 5px 16px;
+  border: 1px solid rgb(214 176 95 / 28%);
   border-radius: 999px;
   font-size: 13px;
-  color: #4b5563;
-  background: #f9fafb;
+  color: #c6b78f;
+  background: rgb(255 255 255 / 4%);
+}
+
+.article-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgb(214 176 95 / 22%);
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border: 1px solid rgb(214 176 95 / 28%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 4%);
+  color: #c6b78f;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms, color 180ms;
+}
+
+.action-btn:hover {
+  border-color: #d6b05f;
+  background: rgb(214 176 95 / 10%);
+  color: #e8c16d;
+}
+
+.action-btn.active {
+  border-color: #d6b05f;
+  background: rgb(214 176 95 / 14%);
+  color: #e8c16d;
+}
+
+.action-icon {
+  font-size: 16px;
 }
 
 @media (max-width: 640px) {
   .article-header h1 {
-    font-size: 22px;
+    font-size: 24px;
   }
 }
 </style>

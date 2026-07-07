@@ -28,6 +28,7 @@ export interface HomeData {
   latestNews: NewsArticle[]
   hotMovies: MovieItem[]
   topRatedMovies: MovieItem[]
+  latestMovies: MovieItem[]
   featuredReviews: ReviewItem[]
   recommendedMerchandise: MerchItem[]
 }
@@ -83,5 +84,21 @@ export const homeApi = {
 
   getNewsRelations(newsId: number) {
     return request.get<unknown, NewsRelation[]>(`/news/${newsId}/relations`)
+  },
+
+  toggleLike(newsId: number, userId = 1) {
+    return request.post<unknown, { liked: boolean; likeCount: number }>(`/news/${newsId}/like`, null, { params: { userId } })
+  },
+
+  getLikeStatus(newsId: number, userId = 1) {
+    return request.get<unknown, { likeCount: number; isLiked: boolean }>(`/news/${newsId}/like-status`, { params: { userId } })
+  },
+
+  toggleFavorite(newsId: number, userId = 1) {
+    return request.post<unknown, { favorited: boolean }>(`/news/${newsId}/favorite`, null, { params: { userId } })
+  },
+
+  getFavoriteStatus(newsId: number, userId = 1) {
+    return request.get<unknown, { isFavorited: boolean }>(`/news/${newsId}/favorite-status`, { params: { userId } })
   },
 }

@@ -6,9 +6,9 @@ spring:
     name: movie-review-system
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:dpshmy-nsoibg00vy6m3nxv-pub.proxy.dms.aliyuncs.com}:${DB_PORT:3306}/${DB_NAME:movie}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&defaultAuthenticationPlugin=mysql_native_password
+    url: jdbc:mysql://dpshmy-nsoibg00vy6m3nxv-pub.proxy.dms.aliyuncs.com:3306/movie?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=10000&socketTimeout=30000
     username: ${DB_USERNAME:uQ0sgL2iNbfkEirFiDrsqOZo}
-    password: ${DB_PASSWORD:}
+    password: ${DB_PASSWORD:P71JlvldMkny8yqZ3DUOt0msOqB7JC}
     hikari:
       initialization-fail-timeout: 0
 
@@ -22,3 +22,5 @@ mybatis-plus:
 logging:
   level:
     com.example.movie: debug
+    com.zaxxer.hikari: trace
+    org.springframework.jdbc: debug

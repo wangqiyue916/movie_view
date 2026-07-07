@@ -1,10 +1,13 @@
 package com.example.movie.news.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.movie.common.response.ApiResponse;
-import com.example.movie.news.entity.NewsArticle;
+import com.example.movie.news.entity.HomepageRecommendation;
+import com.example.movie.news.mapper.HomepageRecommendationMapper;
 import com.example.movie.news.service.NewsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -18,9 +21,28 @@ import java.util.Map;
 public class HomeController {
 
     private final NewsService newsService;
+    private final HomepageRecommendationMapper recommendationMapper;
 
-    public HomeController(NewsService newsService) {
+    public HomeController(NewsService newsService, HomepageRecommendationMapper recommendationMapper) {
         this.newsService = newsService;
+        this.recommendationMapper = recommendationMapper;
+    }
+
+    /**
+     * GET /api/home/recommendations?sectionCode=BANNER_NEWS
+     * 获取指定区域的推荐位列表
+     */
+    @GetMapping("/recommendations")
+    public ApiResponse<List<HomepageRecommendation>> recommendations(
+            @RequestParam(defaultValue = "BANNER_NEWS") String sectionCode
+    ) {
+        List<HomepageRecommendation> list = recommendationMapper.selectList(
+                new LambdaQueryWrapper<HomepageRecommendation>()
+                        .eq(HomepageRecommendation::getSectionCode, sectionCode)
+                        .eq(HomepageRecommendation::getEnabled, 1)
+                        .orderByAsc(HomepageRecommendation::getSortOrder)
+        );
+        return ApiResponse.success(list);
     }
 
     /**
@@ -31,17 +53,22 @@ public class HomeController {
     public ApiResponse<Map<String, Object>> homeData() {
         Map<String, Object> data = new LinkedHashMap<>();
 
-        // 轮播资讯（热门资讯 top 4）
-        data.put("bannerNews", newsService.getHotNews(4));
+        // 轮播资讯（数据库有则查数据库，无则 Mock）
+        List<com.example.movie.news.entity.NewsArticle> bannerNews = newsService.getHotNews(4);
+        data.put("bannerNews", bannerNews.isEmpty() ? buildMockNews(4) : bannerNews);
 
-        // 最新资讯 top 8
-        data.put("latestNews", newsService.getLatestNews(8));
+        // 最新资讯 top 8（数据库有则查数据库，无则 Mock）
+        List<com.example.movie.news.entity.NewsArticle> latestNews = newsService.getLatestNews(8);
+        data.put("latestNews", latestNews.isEmpty() ? buildMockNews(8) : latestNews);
 
         // TODO: 对接王琪越 - 热门电影 Mock
         data.put("hotMovies", buildMockHotMovies());
 
         // TODO: 对接王琪越 - 高分电影 Mock
         data.put("topRatedMovies", buildMockTopRatedMovies());
+
+        // TODO: 对接王琪越 - 最新电影 Mock
+        data.put("latestMovies", buildMockLatestMovies());
 
         // TODO: 对接郭俊岑 - 优质长评 Mock
         data.put("featuredReviews", buildMockFeaturedReviews());
@@ -70,6 +97,16 @@ public class HomeController {
         list.add(movieItem(7L, "光影岁月", "https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=500&q=85", "9.2"));
         list.add(movieItem(4L, "暗夜骑士", "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=500&q=85", "9.0"));
         list.add(movieItem(8L, "午夜剧场", "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=500&q=85", "7.9"));
+        return list;
+    }
+
+    private List<Map<String, Object>> buildMockLatestMovies() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        list.add(movieItem(5L, "星海回响", "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=500&q=85", "8.4"));
+        list.add(movieItem(9L, "银幕之夜", "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=85", "8.1"));
+        list.add(movieItem(6L, "梦境边缘", "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=500&q=85", "8.6"));
+        list.add(movieItem(10L, "北境列车", "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=500&q=85", "7.3"));
+        list.add(movieItem(11L, "蓝色荒原", "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=500&q=85", "7.5"));
         return list;
     }
 
@@ -129,5 +166,36 @@ public class HomeController {
         map.put("image", image);
         map.put("price", price);
         return map;
+    }
+
+    /**
+     * Mock 资讯数据（数据库无数据时的降级方案）
+     */
+    private List<com.example.movie.news.entity.NewsArticle> buildMockNews(int count) {
+        String[][] mockData = {
+            {"新片动态", "暑期档科幻电影热度持续升温", "多部科幻题材影片带动观影讨论，视觉效果、叙事表达与人物塑造成为关注焦点。", "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85"},
+            {"平台活动", "经典高分电影长评征集活动开启", "平台将根据点赞数、收藏数和回复数推荐优质长评，鼓励更深入的电影讨论。", "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=900&q=85"},
+            {"票房观察", "本周口碑片单带动二刷热度", "高分影片的长线表现正在回暖，讨论度集中在角色关系、主题表达和视听风格。", "https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=900&q=85"},
+            {"幕后花絮", "导演特辑公开多场关键戏拍摄细节", "主创团队分享场景搭建、镜头调度和音乐设计，让观众更深入理解影片创作过程。", "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=85"},
+            {"演员动态", "多位主演新片计划进入筹备阶段", "演员阵容、角色设定和类型方向陆续曝光，相关话题持续登上讨论榜。", "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=85"},
+            {"获奖信息", "年度电影奖项公布入围名单", "剧情片、科幻片和动画片竞争激烈，摄影、美术和原创音乐单元关注度提升。", "https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=900&q=85"},
+            {"行业观察", "流媒体与院线窗口期继续调整", "多平台尝试新的发行节奏，观众观影习惯和影片宣发策略都在发生变化。", "https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=900&q=85"},
+            {"周边资讯", "热门电影主题周边开启预售", "海报、徽章、角色模型和限定文创陆续上架，收藏向商品受到影迷关注。", "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=900&q=85"},
+        };
+
+        List<com.example.movie.news.entity.NewsArticle> list = new ArrayList<>();
+        for (int i = 0; i < count && i < mockData.length; i++) {
+            com.example.movie.news.entity.NewsArticle news = new com.example.movie.news.entity.NewsArticle();
+            news.setId((long) (i + 1));
+            news.setCategory(mockData[i][0]);
+            news.setTitle(mockData[i][1]);
+            news.setSummary(mockData[i][2]);
+            news.setCoverUrl(mockData[i][3]);
+            news.setSource("平台编辑");
+            news.setViewCount(1000L + i * 500);
+            news.setPublishedAt(LocalDateTime.now().minusDays(i));
+            list.add(news);
+        }
+        return list;
     }
 }

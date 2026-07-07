@@ -105,8 +105,8 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { homeApi, type HomeData, type NewsArticle, type ReviewItem, type MovieItem } from '@/api/homeApi'
 
-// 轮播数据（使用资讯轮播图）
-const showcaseItems = [
+// 轮播数据
+const showcaseItems = ref([
   {
     kicker: '今日热映',
     title: '星际穿越',
@@ -131,7 +131,7 @@ const showcaseItems = [
     description: '跟随观众评分与长评热度，发现下一部值得看的电影。',
     image: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1800&q=85',
   },
-]
+])
 
 const activeIndex = ref(0)
 const newsScroller = ref<HTMLElement | null>(null)
@@ -141,9 +141,10 @@ let timer: number | undefined
 const latestNews = ref<NewsArticle[]>([])
 const hotMovies = ref<MovieItem[]>([])
 const topRatedMovies = ref<MovieItem[]>([])
+const latestMovies = ref<MovieItem[]>([])
 const featuredReviews = ref<ReviewItem[]>([])
 
-const total = computed(() => showcaseItems.length)
+const total = computed(() => showcaseItems.value.length)
 
 const getSlideClass = (index: number) => {
   const offset = (index - activeIndex.value + total.value) % total.value
@@ -179,6 +180,7 @@ async function fetchHomeData() {
     latestNews.value = data.latestNews || []
     hotMovies.value = data.hotMovies || []
     topRatedMovies.value = data.topRatedMovies || []
+    latestMovies.value = data.latestMovies || []
     featuredReviews.value = data.featuredReviews || []
   } catch {
     // 接口失败时使用空数据，页面会优雅降级
@@ -189,7 +191,7 @@ onMounted(() => {
   fetchHomeData()
   timer = window.setInterval(() => {
     activeIndex.value = (activeIndex.value + 1) % total.value
-  }, 10000)
+  }, 4000)
 })
 
 onBeforeUnmount(() => {

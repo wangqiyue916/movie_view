@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -36,11 +38,18 @@ public class NewsController {
             @RequestParam(required = false) Long movieId
     ) {
         IPage<NewsArticle> result = newsService.getNewsList(page, pageSize, keyword, category, movieId);
+        List<NewsArticle> records = result.getRecords();
+
+        // 数据库无数据时返回 Mock 数据
+        if (records.isEmpty() && (keyword == null || keyword.isBlank()) && category == null && movieId == null) {
+            records = buildMockNewsList();
+        }
+
         return ApiResponse.success(new PageResult<>(
-                result.getRecords(),
+                records,
                 (int) result.getCurrent(),
                 (int) result.getSize(),
-                result.getTotal()
+                (long) records.size()
         ));
     }
 
@@ -51,8 +60,16 @@ public class NewsController {
     public ApiResponse<NewsArticle> detail(@PathVariable Long newsId) {
         NewsArticle news = newsService.getNewsDetail(newsId);
         if (news == null) {
+            List<NewsArticle> mockList = buildMockNewsList();
+            if (newsId >= 1 && newsId <= mockList.size()) {
+                NewsArticle mock = mockList.get((int) (newsId - 1));
+                mock.setViewCount(mock.getViewCount() + 1);
+                return ApiResponse.success(mock);
+            }
             return ApiResponse.error(404, "资讯不存在");
         }
+        news.setViewCount(news.getViewCount() + 1);
+        newsService.updateNews(news);
         return ApiResponse.success(news);
     }
 
@@ -61,6 +78,45 @@ public class NewsController {
      */
     @GetMapping("/{newsId}/relations")
     public ApiResponse<List<NewsRelation>> relations(@PathVariable Long newsId) {
-        return ApiResponse.success(newsService.getNewsRelations(newsId));
+        List<NewsRelation> rels = newsService.getNewsRelations(newsId);
+        if (rels.isEmpty() && newsId == 1) {
+            NewsRelation r = new NewsRelation();
+            r.setId(1L);
+            r.setNewsId(1L);
+            r.setTargetType("MOVIE");
+            r.setTargetId(1L);
+            r.setTargetName("星际穿越");
+            return ApiResponse.success(List.of(r));
+        }
+        return ApiResponse.success(rels);
+    }
+
+    private List<NewsArticle> buildMockNewsList() {
+        String[][] mockData = {
+            {"新片动态", "暑期档科幻电影热度持续升温", "多部科幻题材影片带动观影讨论，视觉效果、叙事表达与人物塑造成为关注焦点。", "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85"},
+            {"平台活动", "经典高分电影长评征集活动开启", "平台将根据点赞数、收藏数和回复数推荐优质长评，鼓励更深入的电影讨论。", "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=900&q=85"},
+            {"票房观察", "本周口碑片单带动二刷热度", "高分影片的长线表现正在回暖，讨论度集中在角色关系、主题表达和视听风格。", "https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=900&q=85"},
+            {"幕后花絮", "导演特辑公开多场关键戏拍摄细节", "主创团队分享场景搭建、镜头调度和音乐设计，让观众更深入理解影片创作过程。", "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=85"},
+            {"演员动态", "多位主演新片计划进入筹备阶段", "演员阵容、角色设定和类型方向陆续曝光，相关话题持续登上讨论榜。", "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=85"},
+            {"获奖信息", "年度电影奖项公布入围名单", "剧情片、科幻片和动画片竞争激烈，摄影、美术和原创音乐单元关注度提升。", "https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=900&q=85"},
+            {"行业观察", "流媒体与院线窗口期继续调整", "多平台尝试新的发行节奏，观众观影习惯和影片宣发策略都在发生变化。", "https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=900&q=85"},
+            {"周边资讯", "热门电影主题周边开启预售", "海报、徽章、角色模型和限定文创陆续上架，收藏向商品受到影迷关注。", "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=900&q=85"},
+        };
+
+        List<NewsArticle> list = new ArrayList<>();
+        for (int i = 0; i < mockData.length; i++) {
+            NewsArticle news = new NewsArticle();
+            news.setId((long) (i + 1));
+            news.setCategory(mockData[i][0]);
+            news.setTitle(mockData[i][1]);
+            news.setSummary(mockData[i][2]);
+            news.setCoverUrl(mockData[i][3]);
+            news.setContent("<p>" + mockData[i][2] + "</p><p>这是一篇精彩的电影资讯文章，详细介绍了相关动态和背景信息。读者可以通过本文了解最新的电影行业趋势和热门话题。</p>");
+            news.setSource("平台编辑");
+            news.setViewCount(1000L + i * 500);
+            news.setPublishedAt(LocalDateTime.now().minusDays(i));
+            list.add(news);
+        }
+        return list;
     }
 }

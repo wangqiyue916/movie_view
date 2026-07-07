@@ -126,8 +126,10 @@ onMounted(() => {
 
 <style scoped>
 .news-list-page {
-  padding-top: 28px;
-  padding-bottom: 48px;
+  min-height: calc(100vh - 64px);
+  padding: 36px max(22px, calc((100vw - 1280px) / 2)) 72px;
+  color: #f7edd5;
+  background: #050505;
 }
 
 .news-header {
@@ -136,13 +138,16 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .news-header h1 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 700;
+  color: #e8c16d;
+  font-family: "Noto Serif SC", "Songti SC", SimSun, serif;
+  font-size: 28px;
+  font-weight: 800;
+  text-shadow: 0 0 16px rgb(214 176 95 / 32%);
 }
 
 .news-filters {
@@ -152,34 +157,46 @@ onMounted(() => {
 
 .search-input {
   width: 220px;
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid #d1d5db;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgb(214 176 95 / 32%);
   border-radius: 6px;
   font-size: 14px;
+  color: #f7edd5;
+  background: rgb(255 255 255 / 6%);
   outline: none;
   transition: border-color 180ms;
 }
 
+.search-input::placeholder {
+  color: rgb(214 176 95 / 38%);
+}
+
 .search-input:focus {
-  border-color: #2563eb;
+  border-color: #d6b05f;
 }
 
 .category-select {
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid #d1d5db;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid rgb(214 176 95 / 32%);
   border-radius: 6px;
   font-size: 14px;
-  background: #fff;
+  color: #f7edd5;
+  background: rgb(255 255 255 / 6%);
   outline: none;
+}
+
+.category-select option {
+  background: #1a1a1a;
+  color: #f7edd5;
 }
 
 .loading,
 .empty {
   text-align: center;
-  padding: 60px 0;
-  color: #9ca3af;
+  padding: 80px 0;
+  color: #9a8b6e;
   font-size: 15px;
 }
 
@@ -190,16 +207,17 @@ onMounted(() => {
 }
 
 .news-card {
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgb(214 176 95 / 22%);
   border-radius: 8px;
-  background: #fff;
+  background: linear-gradient(180deg, rgb(255 255 255 / 6%), rgb(255 255 255 / 2%));
   overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 180ms ease, transform 180ms ease;
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
 
 .news-card:hover {
-  box-shadow: 0 8px 24px rgb(0 0 0 / 10%);
+  border-color: rgb(214 176 95 / 52%);
+  box-shadow: 0 8px 28px rgb(214 176 95 / 14%);
   transform: translateY(-2px);
 }
 
@@ -207,7 +225,7 @@ onMounted(() => {
   position: relative;
   height: 180px;
   overflow: hidden;
-  background: #f3f4f6;
+  background: #111;
 }
 
 .news-card-cover img {
@@ -222,9 +240,10 @@ onMounted(() => {
   left: 10px;
   padding: 2px 10px;
   border-radius: 999px;
-  background: rgb(37 99 235 / 88%);
-  color: #fff;
+  background: rgb(214 176 95 / 82%);
+  color: #050505;
   font-size: 12px;
+  font-weight: 600;
 }
 
 .news-card-body {
@@ -233,6 +252,7 @@ onMounted(() => {
 
 .news-card-body h2 {
   margin: 0 0 8px;
+  color: #fff6df;
   font-size: 16px;
   font-weight: 600;
   line-height: 1.4;
@@ -244,7 +264,7 @@ onMounted(() => {
 
 .news-summary {
   margin: 0 0 12px;
-  color: #6b7280;
+  color: #b9ab90;
   font-size: 13px;
   line-height: 1.55;
   display: -webkit-box;
@@ -256,7 +276,7 @@ onMounted(() => {
 .news-meta {
   display: flex;
   gap: 14px;
-  color: #9ca3af;
+  color: #8a7b60;
   font-size: 12px;
 }
 
@@ -265,29 +285,30 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-top: 32px;
-  color: #4b5563;
+  margin-top: 36px;
+  color: #c6b78f;
   font-size: 14px;
 }
 
 .pagination button {
-  height: 34px;
-  padding: 0 16px;
-  border: 1px solid #d1d5db;
+  height: 36px;
+  padding: 0 18px;
+  border: 1px solid rgb(214 176 95 / 32%);
   border-radius: 6px;
-  background: #fff;
+  background: rgb(255 255 255 / 5%);
+  color: #e8c16d;
   font-size: 14px;
   cursor: pointer;
-  transition: border-color 180ms;
+  transition: border-color 180ms, background 180ms;
 }
 
 .pagination button:hover:not(:disabled) {
-  border-color: #2563eb;
-  color: #2563eb;
+  border-color: #d6b05f;
+  background: rgb(214 176 95 / 13%);
 }
 
 .pagination button:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
