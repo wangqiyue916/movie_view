@@ -308,9 +308,10 @@ onBeforeUnmount(() => {
 .home-page {
   position: relative;
   isolation: isolate;
-  width: 100%;
+  width: min(1280px, max(960px, calc(100% - 420px)));
   min-height: calc(100vh - 64px);
-  padding: 36px max(22px, calc((100vw - 1280px) / 2)) 72px;
+  margin: 0 auto;
+  padding: 36px 0 72px;
   color: #f7edd5;
   background:
     radial-gradient(circle at 8% 18%, rgb(214 176 95 / 14%), transparent 24%),
@@ -763,6 +764,10 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 1100px) {
+  .home-page {
+    width: min(100% - 56px, 1040px);
+  }
+
   .news-list {
     grid-auto-columns: minmax(340px, 78vw);
   }
@@ -774,7 +779,7 @@ onBeforeUnmount(() => {
 
 @media (max-width: 900px) {
   .home-page {
-    padding-inline: 18px;
+    width: calc(100% - 36px);
   }
 
   .showcase {

@@ -70,7 +70,10 @@ const isHomePage = computed(() => route.name === 'HomePage')
 }
 
 .home-layout {
-  background: #050505;
+  background:
+    radial-gradient(circle at 6% 18%, rgb(214 176 95 / 10%), transparent 22%),
+    radial-gradient(circle at 94% 24%, rgb(214 176 95 / 9%), transparent 22%),
+    linear-gradient(180deg, #050505 0%, #0e0c08 46%, #050505 100%);
 }
 
 .home-layout .main-header {
