@@ -4,7 +4,7 @@
       <router-link class="brand" to="/">电影点评系统</router-link>
       <nav class="nav">
         <router-link to="/movies">电影</router-link>
-        <router-link to="/news">资讯</router-link>
+        <a href="/news" @click="handleNewsClick">资讯</a>
         <router-link to="/long-reviews">长评</router-link>
         <router-link to="/merchandise">周边</router-link>
       </nav>
@@ -20,12 +20,29 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
+
+const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
 import { useRoute } from 'vue-router'
 import UserDropdown from '@/components/common/UserDropdown.vue'
 
 const route = useRoute()
 
 const isHomePage = computed(() => route.name === 'HomePage')
+
+function handleNewsClick(e: Event) {
+  if (isHomePage.value) {
+    e.preventDefault()
+    const target = document.getElementById('news-section')
+    if (target) {
+      const top = target.getBoundingClientRect().top + window.scrollY - 80
+      window.scrollTo({ top, behavior: 'smooth' })
+    }
+  }
+}
 </script>
 
 <style scoped>
