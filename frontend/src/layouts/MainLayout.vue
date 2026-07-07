@@ -9,10 +9,7 @@
         <router-link to="/merchandise">周边</router-link>
       </nav>
       <div class="actions">
-        <router-link v-if="!userStore.isLogin" to="/login">登录</router-link>
-        <router-link v-else-if="userStore.hasRole('ADMIN') || userStore.hasRole('SUPER_ADMIN')" to="/admin">后台</router-link>
-        <router-link v-else-if="userStore.hasRole('OFFICIAL')" to="/official">电影商后台</router-link>
-        <span v-if="userStore.isLogin">{{ userStore.userInfo?.nickname }}</span>
+        <UserDropdown :dark="isHomePage" />
       </div>
     </header>
     <main class="main-content">
@@ -24,10 +21,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useUserStore } from '@/stores/userStore'
+import UserDropdown from '@/components/common/UserDropdown.vue'
 
 const route = useRoute()
-const userStore = useUserStore()
 
 const isHomePage = computed(() => route.name === 'HomePage')
 </script>
