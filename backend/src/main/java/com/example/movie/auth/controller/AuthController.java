@@ -2,15 +2,15 @@ package com.example.movie.auth.controller;
 
 import com.example.movie.auth.dto.LoginRequest;
 import com.example.movie.auth.dto.RegisterRequest;
+import com.example.movie.auth.service.AuthService;
 import com.example.movie.auth.vo.CurrentUserVO;
 import com.example.movie.auth.vo.LoginResponse;
+import com.example.movie.common.config.LoginUserContext;
 import com.example.movie.common.response.ApiResponse;
+import com.example.movie.user.entity.UserEntity;
+import com.example.movie.user.mapper.UserMapper;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,32 +18,43 @@ import java.util.List;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private final AuthService authService;
+    private final UserMapper userMapper;
+
+    public AuthController(AuthService authService, UserMapper userMapper) {
+        this.authService = authService;
+        this.userMapper = userMapper;
+    }
+
     @PostMapping("/register")
     public ApiResponse<LoginResponse> register(@Valid @RequestBody RegisterRequest request) {
-        CurrentUserVO user = new CurrentUserVO(1L, request.username(), request.nickname(), null, List.of("USER"));
-        return ApiResponse.success(new LoginResponse("dev-token", user));
+        return ApiResponse.success(authService.register(request));
     }
 
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        List<String> roles = switch (request.username()) {
-            case "admin" -> List.of("ADMIN");
-            case "super_admin" -> List.of("SUPER_ADMIN");
-            case "official" -> List.of("OFFICIAL");
-            default -> List.of("USER");
-        };
-        CurrentUserVO user = new CurrentUserVO(1L, request.username(), request.username(), null, roles);
-        return ApiResponse.success(new LoginResponse("dev-token", user));
+        return ApiResponse.success(authService.login(request));
     }
 
     @PostMapping("/logout")
     public ApiResponse<Void> logout() {
+        LoginUserContext.clear();
         return ApiResponse.success();
     }
 
     @GetMapping("/me")
     public ApiResponse<CurrentUserVO> me() {
-        return ApiResponse.success(new CurrentUserVO(1L, "dev_user", "开发用户", null, List.of("USER")));
+        if (!LoginUserContext.isLogin()) {
+            return ApiResponse.error(401, "未登录");
+        }
+        UserEntity user = userMapper.selectById(LoginUserContext.getUserId());
+        if (user == null) {
+            return ApiResponse.error(404, "用户不存在");
+        }
+        List<String> roles = LoginUserContext.getRoles();
+        CurrentUserVO vo = new CurrentUserVO(user.getId(), user.getUsername(),
+                user.getNickname(), user.getAvatarUrl(), roles);
+        return ApiResponse.success(vo);
     }
 }
 
