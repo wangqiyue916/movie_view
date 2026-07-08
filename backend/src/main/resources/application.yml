@@ -11,6 +11,11 @@ spring:
     password: ${DB_PASSWORD:P71JlvldMkny8yqZ3DUOt0msOqB7JC}
     hikari:
       initialization-fail-timeout: 0
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 10000
 
 mybatis-plus:
   configuration:
