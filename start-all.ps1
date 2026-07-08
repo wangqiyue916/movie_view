@@ -1,90 +1,114 @@
-# 电影点评系统 - 一键启动脚本
-# 自动关闭旧端口、启动后端、前端
+# ============================================
+# One-click Start Script - Frontend & Backend
+# ============================================
 
+Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  电影点评系统 - 一键启动" -ForegroundColor Cyan
+Write-Host "  Movie Review System - Starting..." -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-$projectDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-Set-Location $projectDir
+# ---- Configure paths ----
+$NodePath = "C:\Program Files\nodejs"
+$MvnPath  = "C:\ProgramData\apache-maven-3.9.9\bin"
+$BackendDir  = Join-Path $PSScriptRoot "backend"
+$FrontendDir = Join-Path $PSScriptRoot "frontend"
 
-# 1. 清理 8080 端口
-Write-Host "[1/4] 检查端口 8080..." -ForegroundColor Yellow
-$pid8080 = (netstat -ano | Select-String ":8080" | Select-String "LISTENING" | ForEach-Object { ($_ -split '\s+')[-1] } | Select-Object -First 1)
-if ($pid8080) {
-    Write-Host "  发现进程 PID=$pid8080 占用 8080 端口，正在终止..." -ForegroundColor Red
-    taskkill /F /PID $pid8080 2>$null | Out-Null
-    Start-Sleep -Seconds 1
-    Write-Host "  已释放 8080 端口" -ForegroundColor Green
-} else {
-    Write-Host "  8080 端口空闲" -ForegroundColor Green
+# ---- Fix PATH for this session ----
+$env:Path = "$NodePath;$MvnPath;" + $env:Path
+
+# ---- Check tools ----
+$nodeExe = Join-Path $NodePath "node.exe"
+$mvnCmd  = Join-Path $MvnPath "mvn.cmd"
+$nodeOk = Test-Path $nodeExe
+$mvnOk  = Test-Path $mvnCmd
+
+if (-not $nodeOk) {
+    Write-Host "[ERROR] Node.js not found at: $NodePath" -ForegroundColor Red
+    Write-Host "Please install Node.js or update NodePath in this script." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    exit 1
+}
+if (-not $mvnOk) {
+    Write-Host "[ERROR] Maven not found at: $MvnPath" -ForegroundColor Red
+    Write-Host "Please install Maven or update MvnPath in this script." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    exit 1
 }
 
-# 2. 设置数据库连接（硬编码确保不受环境变量干扰）
-Write-Host "[2/4] 配置数据库连接..." -ForegroundColor Yellow
-$env:DB_HOST = "dpshmy-nsoibg00vy6m3nxv-pub.proxy.dms.aliyuncs.com"
-$env:DB_PORT = "3306"
-$env:DB_NAME = "movie"
-$env:DB_USERNAME = "uQ0sgL2iNbfkEirFiDrsqOZo"
-$env:DB_PASSWORD = "P71JlvldMkny8yqZ3DUOt0msOqB7JC"
-Write-Host "  数据库: $env:DB_HOST`:$env:DB_PORT/$env:DB_NAME" -ForegroundColor Green
+$nodeVer = & $nodeExe --version
+Write-Host "[OK] Node.js: $nodeVer" -ForegroundColor Green
+Write-Host "[OK] Maven: ready" -ForegroundColor Green
+Write-Host ""
 
-# 3. 启动后端
-Write-Host "[3/4] 启动后端 (Spring Boot)..." -ForegroundColor Yellow
-$backendJob = Start-Job -ScriptBlock {
-    param($dir)
-    Set-Location $dir
-    mvn spring-boot:run -q 2>&1
-} -ArgumentList "$projectDir\backend"
+# ---- 1. Start Backend (Spring Boot) ----
+Write-Host ">>> Starting backend (Spring Boot on port 8080)..." -ForegroundColor Yellow
+$argList = "-f", (Join-Path $BackendDir "pom.xml"), "spring-boot:run", "-DskipTests"
+$backendProc = Start-Process -FilePath $mvnCmd `
+    -ArgumentList $argList `
+    -PassThru `
+    -WindowStyle Minimized
 
-Write-Host "  等待后端启动..." -ForegroundColor Yellow
-$timeout = 60
-$started = $false
-for ($i = 0; $i -lt $timeout; $i++) {
-    Start-Sleep -Seconds 1
+Write-Host "    Backend PID: $($backendProc.Id)" -ForegroundColor Gray
+Write-Host "    Waiting for backend to be ready (up to 30s)..." -ForegroundColor Gray
+
+# ---- Wait for backend health check ----
+$ready = $false
+for ($i = 0; $i -lt 15; $i++) {
+    Start-Sleep -Seconds 2
     try {
-        $response = Invoke-WebRequest -Uri "http://localhost:8080/api/home" -TimeoutSec 2 -ErrorAction SilentlyContinue
-        if ($response.StatusCode -eq 200) {
-            $started = $true
+        $result = Invoke-RestMethod -Uri "http://localhost:8080/api/health" -Method Get -TimeoutSec 3 -ErrorAction Stop
+        if ($result.code -eq 0) {
+            $ready = $true
             break
         }
-    } catch {}
-    if ($i % 5 -eq 0) { Write-Host "  等待中... ($i 秒)" -ForegroundColor Gray }
+    } catch {
+        # not ready yet
+    }
 }
-if ($started) {
-    Write-Host "  后端启动成功! http://localhost:8080" -ForegroundColor Green
+
+if ($ready) {
+    Write-Host "[OK] Backend is ready!" -ForegroundColor Green
 } else {
-    Write-Host "  后端可能还在初始化中，请稍后手动检查" -ForegroundColor Yellow
+    Write-Host "[WARN] Backend might still be starting, proceeding anyway..." -ForegroundColor Yellow
+}
+Write-Host ""
+
+# ---- 2. Ensure .env exists ----
+$envFile = Join-Path $FrontendDir ".env"
+if (-not (Test-Path $envFile)) {
+    "VITE_API_BASE_URL=http://localhost:8080/api" | Out-File -FilePath $envFile -Encoding ascii
+    Write-Host "[OK] Created frontend/.env" -ForegroundColor Green
 }
 
-# 4. 启动前端
-Write-Host "[4/4] 启动前端 (Vite)..." -ForegroundColor Yellow
-$frontendJob = Start-Job -ScriptBlock {
-    param($dir)
-    Set-Location $dir
-    npm run dev 2>&1
-} -ArgumentList "$projectDir\frontend"
+# ---- 3. Start Frontend (Vite) ----
+Write-Host ">>> Starting frontend (Vite)..." -ForegroundColor Yellow
+$npmCmd = Join-Path $NodePath "npm.cmd"
+$frontendProc = Start-Process -FilePath $npmCmd `
+    -ArgumentList "run", "dev" `
+    -WorkingDirectory $FrontendDir `
+    -PassThru `
+    -WindowStyle Minimized
 
-Start-Sleep -Seconds 3
+Write-Host "    Frontend PID: $($frontendProc.Id)" -ForegroundColor Gray
+Start-Sleep -Seconds 5
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  启动完成!" -ForegroundColor Green
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  后端: http://localhost:8080" -ForegroundColor White
-Write-Host "  前端: http://localhost:5173" -ForegroundColor White
-Write-Host "  数据库: 阿里云 DMS (已连接)" -ForegroundColor White
+Write-Host "  ALL SERVICES STARTED!" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "按任意键退出 (会同时关闭前后端)..." -ForegroundColor Gray
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+Write-Host "  Backend API : http://localhost:8080" -ForegroundColor White
+Write-Host "  Frontend    : http://localhost:5173" -ForegroundColor White
+Write-Host ""
+Write-Host "  Login: admin / 123456" -ForegroundColor White
+Write-Host ""
+Write-Host "Press Enter to open frontend in browser..." -ForegroundColor Gray
+Read-Host | Out-Null
 
-# 清理
-Write-Host "正在关闭服务..." -ForegroundColor Yellow
-Stop-Job -Job $backendJob -ErrorAction SilentlyContinue
-Stop-Job -Job $frontendJob -ErrorAction SilentlyContinue
-Remove-Job -Job $backendJob -ErrorAction SilentlyContinue
-Remove-Job -Job $frontendJob -ErrorAction SilentlyContinue
-$pid8080 = (netstat -ano | Select-String ":8080" | Select-String "LISTENING" | ForEach-Object { ($_ -split '\s+')[-1] } | Select-Object -First 1)
-if ($pid8080) { taskkill /F /PID $pid8080 2>$null | Out-Null }
-Write-Host "已关闭" -ForegroundColor Green
+Start-Process "http://localhost:5173"
+
+Write-Host "Browser opened. Close this window to stop." -ForegroundColor Gray
+Write-Host "To stop all services, end node.exe and java.exe in Task Manager." -ForegroundColor Gray
+Write-Host ""
+Read-Host "Press Enter to exit"

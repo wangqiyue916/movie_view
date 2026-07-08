@@ -346,7 +346,9 @@ INSERT INTO `movie`.`long_reviews` (
   id, movie_id, user_id, title, content_md, cover_url, status, view_count,
   like_count, favorite_count, reply_count, is_featured, featured_at
 ) VALUES
-(1, 1, 1, '穿越星际之后，仍然回到人的情感', '## 关于《星际穿越》\n\n这部电影最动人的地方，是它把宏大的宇宙尺度和亲情联系在一起。', NULL, 'ONLINE', 180, 32, 8, 5, 1, NOW())
+(1, 1, 1, '穿越星际之后，仍然回到人的情感', '## 关于《星际穿越》\n\n这部电影最动人的地方，是它把宏大的宇宙尺度和亲情联系在一起。真正让人反复回看的，并不只是结构，还有每一层梦境背后未被说破的执念。', NULL, 'ONLINE', 180, 32, 8, 5, 1, NOW()),
+(2, 3, 3, '梦境不是谜题，而是欲望的回声', '## 关于《盗梦空间》\n\n真正让人反复回看的，并不只是结构，还有每一层梦境背后未被说破的执念。', NULL, 'ONLINE', 96, 24, 5, 7, 1, NOW()),
+(3, 2, 2, '灾难片里的群像，为什么仍然能打动人', '## 关于《流浪地球2》\n\n当宏大工程、末日危机和个体选择并置时，电影真正要讨论的不是奇观本身。', NULL, 'ONLINE', 72, 18, 2, 3, 1, NOW())
 ON DUPLICATE KEY UPDATE title = VALUES(title), status = VALUES(status), updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO `movie`.`interpretation_videos` (

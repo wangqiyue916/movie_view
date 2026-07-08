@@ -2,7 +2,6 @@ package com.example.movie.news.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.LocalDateTime;
@@ -26,7 +25,6 @@ public class NewsArticle {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @TableLogic
     private LocalDateTime deletedAt;
 
     public Long getId() {

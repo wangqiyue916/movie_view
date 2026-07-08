@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.movie.longreview.mapper.ReviewReplyMapper">
+
+    <resultMap id="replyVOMap" type="com.example.movie.longreview.vo.ReviewReplyVO">
+        <id column="id" property="id"/>
+        <result column="review_id" property="reviewId"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="content" property="content"/>
+        <result column="status" property="status"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="report_count" property="reportCount"/>
+        <result column="liked" property="liked"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <select id="selectReplyPage" resultMap="replyVOMap">
+        SELECT
+            rr.*,
+            u.nickname AS user_nickname,
+            u.avatar_url AS user_avatar,
+            CASE WHEN lk.id IS NOT NULL THEN 1 ELSE 0 END AS liked
+        FROM review_replies rr
+        LEFT JOIN users u ON rr.user_id = u.id
+        LEFT JOIN likes lk ON lk.target_type = 'REVIEW_REPLY' AND lk.target_id = rr.id AND lk.user_id = #{currentUserId}
+        WHERE rr.review_id = #{reviewId}
+        AND rr.deleted_at IS NULL
+        AND rr.status = 'NORMAL'
+        AND rr.parent_id IS NULL
+        ORDER BY rr.created_at ASC
+    </select>
+
+    <select id="selectChildReplies" resultMap="replyVOMap">
+        SELECT
+            rr.*,
+            u.nickname AS user_nickname,
+            u.avatar_url AS user_avatar,
+            CASE WHEN lk.id IS NOT NULL THEN 1 ELSE 0 END AS liked
+        FROM review_replies rr
+        LEFT JOIN users u ON rr.user_id = u.id
+        LEFT JOIN likes lk ON lk.target_type = 'REVIEW_REPLY' AND lk.target_id = rr.id AND lk.user_id = #{currentUserId}
+        WHERE rr.parent_id = #{parentId}
+        AND rr.deleted_at IS NULL
+        AND rr.status = 'NORMAL'
+        ORDER BY rr.created_at ASC
+    </select>
+
+</mapper>
