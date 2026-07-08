@@ -23,8 +23,8 @@
         </div>
       </div>
 
-      <div v-if="loading" class="loading-skeleton">
-        <SkeletonCard v-for="n in 5" :key="n" height="140px" />
+      <div v-if="loading" class="loading-state">
+        <p>加载中...</p>
       </div>
 
       <div v-else-if="reviews.length === 0" class="empty-state">
@@ -94,7 +94,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getReviewList, type LongReviewVO } from '@/api/longReviewApi'
-import SkeletonCard from '@/components/common/SkeletonCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -276,14 +275,7 @@ onMounted(() => {
 }
 
 /* ===== 加载 / 空状态 ===== */
-.loading-skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 20px 0;
-}
-
-.empty-state {
+.loading-state, .empty-state {
   text-align: center;
   padding: 60px 0;
   color: #b9ab90;

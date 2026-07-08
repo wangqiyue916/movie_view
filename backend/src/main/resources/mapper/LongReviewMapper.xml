@@ -127,4 +127,22 @@
         ORDER BY lr.created_at DESC
     </select>
 
+    <select id="selectFavoriteReviews" resultMap="reviewVOMap">
+        SELECT
+            lr.*,
+            m.title AS movie_title,
+            u.nickname AS author_nickname,
+            u.avatar_url AS author_avatar,
+            CASE WHEN lk.id IS NOT NULL THEN 1 ELSE 0 END AS liked,
+            CASE WHEN fv2.id IS NOT NULL THEN 1 ELSE 0 END AS favorited
+        FROM long_reviews lr
+        INNER JOIN favorites fv ON fv.target_type = 'LONG_REVIEW' AND fv.target_id = lr.id AND fv.user_id = #{userId}
+        LEFT JOIN movies m ON lr.movie_id = m.id
+        LEFT JOIN users u ON lr.user_id = u.id
+        LEFT JOIN likes lk ON lk.target_type = 'LONG_REVIEW' AND lk.target_id = lr.id AND lk.user_id = #{userId}
+        LEFT JOIN favorites fv2 ON fv2.target_type = 'LONG_REVIEW' AND fv2.target_id = lr.id AND fv2.user_id = #{userId}
+        WHERE lr.deleted_at IS NULL
+        ORDER BY fv.created_at DESC
+    </select>
+
 </mapper>

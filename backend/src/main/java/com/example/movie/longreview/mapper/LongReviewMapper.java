@@ -23,4 +23,7 @@ public interface LongReviewMapper extends BaseMapper<LongReview> {
 
     Page<LongReviewVO> selectMyReviews(Page<LongReview> page,
                                        @Param("userId") Long userId);
+
+    Page<LongReviewVO> selectFavoriteReviews(Page<LongReview> page,
+                                              @Param("userId") Long userId);
 }

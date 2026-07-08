@@ -104,6 +104,14 @@ export function getReviewList(params: {
   return request.get('/long-reviews', { params })
 }
 
+/** 获取我的收藏列表 */
+export function getFavoriteReviews(params: {
+  page?: number
+  pageSize?: number
+}): Promise<{ data: { data: PageData<LongReviewVO> } }> {
+  return request.get('/long-reviews/favorites', { params })
+}
+
 /** 获取精选长评列表（首页"优质长评"模块使用） */
 export function getFeaturedReviews(params: {
   page?: number

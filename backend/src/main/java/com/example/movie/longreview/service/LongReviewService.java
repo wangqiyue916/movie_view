@@ -36,4 +36,6 @@ public interface LongReviewService {
     PageResult<FeaturedReviewVO> getFeaturedReviews(int page, int pageSize);
 
     PageResult<LongReviewVO> getMyReviews(Long userId, int page, int pageSize);
+
+    PageResult<LongReviewVO> getFavoriteReviews(Long userId, int page, int pageSize);
 }
