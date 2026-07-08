@@ -5,7 +5,8 @@
       <nav class="nav">
         <router-link to="/movies">电影</router-link>
         <a href="/news" @click="handleNewsClick">资讯</a>
-        <router-link to="/long-reviews">长评</router-link>
+        <a href="/long-reviews" @click="handleReviewsClick">长评</a>
+        <router-link to="/favorites" v-if="userStore.isLogin">收藏</router-link>
         <router-link to="/merchandise">周边</router-link>
       </nav>
       <div class="actions">
@@ -21,9 +22,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
 import UserDropdown from '@/components/common/UserDropdown.vue'
 
 const route = useRoute()
+const userStore = useUserStore()
+
+const isHomePage = computed(() => route.name === 'HomePage')
 const blackGoldRoutes = ['HomePage', 'MovieListPage', 'MovieDetailPage']
 const isBlackGoldLayout = computed(() => blackGoldRoutes.includes(route.name as string))
 
@@ -31,6 +36,17 @@ function handleNewsClick(e: Event) {
   if (route.name === 'HomePage') {
     e.preventDefault()
     const target = document.getElementById('news-section')
+    if (target) {
+      const top = target.getBoundingClientRect().top + window.scrollY - 80
+      window.scrollTo({ top, behavior: 'smooth' })
+    }
+  }
+}
+
+function handleReviewsClick(e: Event) {
+  if (isHomePage.value) {
+    e.preventDefault()
+    const target = document.getElementById('reviews-section')
     if (target) {
       const top = target.getBoundingClientRect().top + window.scrollY - 80
       window.scrollTo({ top, behavior: 'smooth' })

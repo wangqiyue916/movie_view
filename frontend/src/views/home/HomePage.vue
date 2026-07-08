@@ -85,10 +85,11 @@
     </section>
 
     <!-- 优质长评 -->
-    <section class="content-section reviews-section">
+    <section id="reviews-section" class="content-section reviews-section">
       <div class="section-heading">
         <span></span>
         <h2>优质长评</h2>
+        <router-link to="/long-reviews" class="news-more-link">更多 ›</router-link>
       </div>
       <div class="review-list">
         <article v-for="review in featuredReviews" :key="review.title" class="review-card">
