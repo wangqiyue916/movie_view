@@ -40,7 +40,15 @@
         <section v-for="group in movieGroups" :key="group.title" class="movie-category">
           <h3>{{ group.title }}</h3>
           <div class="poster-row">
-            <article v-for="movie in group.movies" :key="`${group.title}-${movie.title}`" class="poster-card">
+            <article
+              v-for="movie in group.movies"
+              :key="`${group.title}-${movie.title}`"
+              class="poster-card"
+              role="button"
+              tabindex="0"
+              @click="openMovie(movie.id, movie.title)"
+              @keyup.enter="openMovie(movie.id, movie.title)"
+            >
               <div class="poster-frame">
                 <img :src="movie.poster" :alt="movie.title" />
                 <strong>{{ movie.score }}</strong>
@@ -101,6 +109,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { homeApi, type HomeData, type NewsArticle, type ReviewItem, type MovieItem } from '@/api/homeApi'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // 轮播数据
 const showcaseItems = ref([
@@ -132,6 +143,11 @@ const showcaseItems = ref([
 
 const activeIndex = ref(0)
 let timer: number | undefined
+const seededMovieIds: Record<string, number> = {
+  星际穿越: 1,
+  流浪地球2: 2,
+  盗梦空间: 3,
+}
 
 // API 数据
 const latestNews = ref<NewsArticle[]>([])
@@ -154,15 +170,15 @@ const getSlideClass = (index: number) => {
 const movieGroups = computed(() => [
   {
     title: '近期热门',
-    movies: hotMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
+    movies: hotMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster, score: m.score })),
   },
   {
     title: '高分推荐',
-    movies: topRatedMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
+    movies: topRatedMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster, score: m.score })),
   },
   {
     title: '最新上映',
-    movies: latestMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
+    movies: latestMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster, score: m.score })),
   },
 ])
 
@@ -181,6 +197,10 @@ async function fetchHomeData() {
   } catch {
     // 接口失败时使用空数据，页面会优雅降级
   }
+}
+
+const openMovie = (id: number | undefined, title: string) => {
+  router.push(`/movies/${id || seededMovieIds[title] || 1}`)
 }
 
 onMounted(() => {
@@ -209,16 +229,7 @@ onBeforeUnmount(() => {
   min-height: calc(100vh - 64px);
   padding: 36px max(22px, calc((100vw - 1280px) / 2)) 72px;
   color: #f7edd5;
-  background:
-    radial-gradient(circle at 8% 18%, rgb(214 176 95 / 14%), transparent 24%),
-    radial-gradient(circle at 92% 26%, rgb(214 176 95 / 12%), transparent 24%),
-    radial-gradient(circle at 50% 100%, rgb(214 176 95 / 10%), transparent 34%),
-    radial-gradient(circle at 18% 34%, rgb(214 176 95 / 18%) 0 1px, transparent 2px),
-    radial-gradient(circle at 84% 42%, rgb(214 176 95 / 16%) 0 1px, transparent 2px),
-    radial-gradient(circle at 10% 72%, rgb(214 176 95 / 12%) 0 1px, transparent 2px),
-    radial-gradient(circle at 91% 78%, rgb(214 176 95 / 14%) 0 1px, transparent 2px),
-    linear-gradient(180deg, #050505 0%, #0e0c08 46%, #050505 100%),
-    repeating-linear-gradient(90deg, rgb(214 176 95 / 8%) 0 1px, transparent 1px 120px);
+  background: transparent;
 }
 
 .home-page::before,
@@ -533,6 +544,7 @@ onBeforeUnmount(() => {
 
 .poster-card {
   min-width: 0;
+  cursor: pointer;
 }
 
 .poster-frame {

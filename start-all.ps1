@@ -21,13 +21,13 @@ if ($pid8080) {
     Write-Host "  8080 端口空闲" -ForegroundColor Green
 }
 
-# 2. 设置数据库连接（硬编码确保不受环境变量干扰）
+# 2. 设置数据库连接（优先读取本机环境变量）
 Write-Host "[2/4] 配置数据库连接..." -ForegroundColor Yellow
-$env:DB_HOST = "dpshmy-nsoibg00vy6m3nxv-pub.proxy.dms.aliyuncs.com"
-$env:DB_PORT = "3306"
-$env:DB_NAME = "movie"
-$env:DB_USERNAME = "uQ0sgL2iNbfkEirFiDrsqOZo"
-$env:DB_PASSWORD = "P71JlvldMkny8yqZ3DUOt0msOqB7JC"
+if (-not $env:DB_HOST) { $env:DB_HOST = "localhost" }
+if (-not $env:DB_PORT) { $env:DB_PORT = "3306" }
+if (-not $env:DB_NAME) { $env:DB_NAME = "movie" }
+if (-not $env:DB_USERNAME) { $env:DB_USERNAME = "root" }
+if (-not $env:DB_PASSWORD) { $env:DB_PASSWORD = "" }
 Write-Host "  数据库: $env:DB_HOST`:$env:DB_PORT/$env:DB_NAME" -ForegroundColor Green
 
 # 3. 启动后端

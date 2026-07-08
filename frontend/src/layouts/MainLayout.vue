@@ -1,5 +1,5 @@
 <template>
-  <div class="main-layout" :class="{ 'home-layout': isHomePage }">
+  <div class="main-layout" :class="{ 'home-layout': isBlackGoldLayout }">
     <header class="main-header">
       <router-link class="brand" to="/">电影点评系统</router-link>
       <nav class="nav">
@@ -9,7 +9,7 @@
         <router-link to="/merchandise">周边</router-link>
       </nav>
       <div class="actions">
-        <UserDropdown :dark="isHomePage" />
+        <UserDropdown :dark="isBlackGoldLayout" />
       </div>
     </header>
     <main class="main-content">
@@ -20,21 +20,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/userStore'
-
-const route = useRoute()
-const router = useRouter()
-const userStore = useUserStore()
 import { useRoute } from 'vue-router'
 import UserDropdown from '@/components/common/UserDropdown.vue'
 
 const route = useRoute()
-
-const isHomePage = computed(() => route.name === 'HomePage')
+const blackGoldRoutes = ['HomePage', 'MovieListPage', 'MovieDetailPage']
+const isBlackGoldLayout = computed(() => blackGoldRoutes.includes(route.name as string))
 
 function handleNewsClick(e: Event) {
-  if (isHomePage.value) {
+  if (route.name === 'HomePage') {
     e.preventDefault()
     const target = document.getElementById('news-section')
     if (target) {

@@ -18,11 +18,11 @@ echo   8080 端口已就绪
 
 :: 2. 设置数据库环境变量
 echo [2/3] 配置数据库连接...
-set DB_HOST=dpshmy-nsoibg00vy6m3nxv-pub.proxy.dms.aliyuncs.com
-set DB_PORT=3306
-set DB_NAME=movie
-set DB_USERNAME=uQ0sgL2iNbfkEirFiDrsqOZo
-set DB_PASSWORD=P71JlvldMkny8yqZ3DUOt0msOqB7JC
+if "%DB_HOST%"=="" set DB_HOST=localhost
+if "%DB_PORT%"=="" set DB_PORT=3306
+if "%DB_NAME%"=="" set DB_NAME=movie
+if "%DB_USERNAME%"=="" set DB_USERNAME=root
+if "%DB_PASSWORD%"=="" set DB_PASSWORD=
 
 :: 3. 启动后端
 echo [3/3] 启动后端和前端...

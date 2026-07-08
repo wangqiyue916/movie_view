@@ -2,6 +2,19 @@
   box-sizing: border-box;
 }
 
+:root {
+  --color-bg-black: #050505;
+  --color-bg-deep: #0e0c08;
+  --color-gold: #d6b05f;
+  --color-gold-text: #e8c16d;
+  --color-title-warm: #fff8e6;
+  --color-text-main: #d8c69b;
+  --color-text-muted: #b9ab90;
+  --color-text-dim: #c6b78f;
+  --color-border-gold: rgb(214 176 95 / 22%);
+  --color-card-bg: linear-gradient(180deg, rgb(255 255 255 / 6%), rgb(255 255 255 / 2%));
+}
+
 body {
   margin: 0;
   color: #1f2937;
