@@ -9,28 +9,22 @@
       <div class="toolbar">
         <div class="sort-tabs">
           <button
-            :class="['tab-btn', { active: tab === 'all' && sortBy === 'createdAt' }]"
-            @click="tab = 'all'; sortBy = 'createdAt'; page = 1; fetchReviews()"
+            :class="['tab-btn', { active: sortBy === 'createdAt' }]"
+            @click="sortBy = 'createdAt'; fetchReviews()"
           >
             最新
           </button>
           <button
-            :class="['tab-btn', { active: tab === 'all' && sortBy === 'hot' }]"
-            @click="tab = 'all'; sortBy = 'hot'; page = 1; fetchReviews()"
+            :class="['tab-btn', { active: sortBy === 'hot' }]"
+            @click="sortBy = 'hot'; fetchReviews()"
           >
             最热
-          </button>
-          <button
-            :class="['tab-btn', { active: tab === 'favorites' }]"
-            @click="tab = 'favorites'; page = 1; fetchReviews()"
-          >
-            我的收藏
           </button>
         </div>
       </div>
 
-      <div v-if="loading" class="loading-state">
-        <p>加载中...</p>
+      <div v-if="loading" class="loading-skeleton">
+        <SkeletonCard v-for="n in 5" :key="n" height="140px" />
       </div>
 
       <div v-else-if="reviews.length === 0" class="empty-state">
@@ -99,7 +93,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getReviewList, getFavoriteReviews, type LongReviewVO } from '@/api/longReviewApi'
+import { getReviewList, type LongReviewVO } from '@/api/longReviewApi'
+import SkeletonCard from '@/components/common/SkeletonCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -110,7 +105,6 @@ const page = ref(1)
 const pageSize = 10
 const total = ref(0)
 const sortBy = ref('createdAt')
-const tab = ref<'all' | 'favorites'>('all')
 
 const movieId = computed(() => {
   const id = route.query.movieId
@@ -122,17 +116,13 @@ const totalPages = computed(() => Math.ceil(total.value / pageSize) || 1)
 async function fetchReviews() {
   loading.value = true
   try {
-    let res: any
-    if (tab.value === 'favorites') {
-      res = await getFavoriteReviews({ page: page.value, pageSize })
-    } else {
-      res = await getReviewList({
-        movieId: movieId.value,
-        sortBy: sortBy.value,
-        page: page.value,
-        pageSize,
-      })
-    }
+    const res: any = await getReviewList({
+      movieId: movieId.value,
+      sortBy: sortBy.value,
+      page: page.value,
+      pageSize,
+    })
+    // Axios interceptor unwraps: res is { list, total, ... }
     reviews.value = res.list || []
     total.value = res.total || 0
   } catch (err) {

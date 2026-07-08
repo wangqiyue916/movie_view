@@ -24,7 +24,9 @@
       </div>
     </div>
 
-    <div v-if="loading" class="loading">加载中...</div>
+    <div v-if="loading" class="loading-skeleton">
+      <SkeletonCard v-for="n in 6" :key="n" height="200px" />
+    </div>
 
     <div v-else-if="newsList.length === 0" class="empty">
       <p>暂无资讯</p>
@@ -67,6 +69,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { homeApi, type NewsArticle } from '@/api/homeApi'
+import SkeletonCard from '@/components/common/SkeletonCard.vue'
 
 const router = useRouter()
 
@@ -192,7 +195,12 @@ onMounted(() => {
   color: #f7edd5;
 }
 
-.loading,
+.loading-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
 .empty {
   text-align: center;
   padding: 80px 0;
