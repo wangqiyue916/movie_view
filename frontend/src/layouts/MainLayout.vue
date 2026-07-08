@@ -22,14 +22,11 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import UserDropdown from '@/components/common/UserDropdown.vue'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
-import { useRoute } from 'vue-router'
-import UserDropdown from '@/components/common/UserDropdown.vue'
-
-const route = useRoute()
 
 const isHomePage = computed(() => route.name === 'HomePage')
 
