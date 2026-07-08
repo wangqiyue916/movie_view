@@ -15,6 +15,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'news', name: 'NewsListPage', component: () => import('@/views/news/NewsListPage.vue') },
       { path: 'news/:id', name: 'NewsDetailPage', component: () => import('@/views/news/NewsDetailPage.vue') },
       { path: 'long-reviews', name: 'LongReviewListPage', component: () => import('@/views/review/LongReviewListPage.vue') },
+      { path: 'long-reviews/create', name: 'LongReviewCreatePage', component: () => import('@/views/review/LongReviewCreatePage.vue') },
       { path: 'long-reviews/:id', name: 'LongReviewDetailPage', component: () => import('@/views/review/LongReviewDetailPage.vue') },
       { path: 'merchandise', name: 'MerchandiseListPage', component: () => import('@/views/merchandise/MerchandiseListPage.vue') },
     ],
