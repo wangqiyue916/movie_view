@@ -58,7 +58,6 @@
         LEFT JOIN likes lk ON lk.target_type = 'LONG_REVIEW' AND lk.target_id = lr.id AND lk.user_id = #{currentUserId}
         LEFT JOIN favorites fv ON fv.target_type = 'LONG_REVIEW' AND fv.target_id = lr.id AND fv.user_id = #{currentUserId}
         WHERE lr.deleted_at IS NULL
-        AND lr.status = 'ONLINE'
         <if test="movieId != null">
             AND lr.movie_id = #{movieId}
         </if>
