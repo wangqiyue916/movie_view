@@ -1,32 +1,15 @@
 <template>
-  <div class="page audit-list-page">
+  <div class="page admin-video-page">
     <div class="page-header">
-      <h1>内容审核</h1>
+      <h1>视频管理</h1>
     </div>
-
-    <!-- Content Type Tabs -->
-    <el-tabs v-model="contentType" @tab-change="handleContentTypeChange">
-      <el-tab-pane label="资讯" name="NEWS" />
-      <el-tab-pane label="视频" name="VIDEO" />
-      <el-tab-pane label="周边" name="MERCHANDISE" />
-    </el-tabs>
-
-    <!-- Status Tabs -->
-    <el-tabs v-model="statusTab" @tab-change="handleStatusChange">
-      <el-tab-pane label="全部" name="" />
-      <el-tab-pane label="待审核" name="PENDING" />
-      <el-tab-pane label="已通过" name="APPROVED" />
-      <el-tab-pane label="已驳回" name="REJECTED" />
-      <el-tab-pane label="已上线" name="ONLINE" />
-      <el-tab-pane label="已下架" name="OFFLINE" />
-    </el-tabs>
 
     <div v-if="loading" class="loading-state">
       <el-skeleton :rows="8" animated />
     </div>
 
     <div v-else-if="tableData.length === 0" class="empty-state">
-      <el-empty description="暂无审核数据" />
+      <el-empty description="暂无视频数据" />
     </div>
 
     <div v-else class="table-wrapper">
@@ -34,27 +17,32 @@
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column label="标题" min-width="180">
           <template #default="{ row }">
-            <span class="cell-title">{{ row.title || row.name || '-' }}</span>
+            <span class="cell-title">{{ row.title || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="类型" width="90">
+        <el-table-column label="平台" width="100">
           <template #default="{ row }">
-            <el-tag size="small" type="info">{{ contentTypeLabel }}</el-tag>
+            <el-tag size="small" type="info">{{ row.platform || '-' }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="关联电影ID" width="100">
+          <template #default="{ row }">
+            {{ row.movieId || '-' }}
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
             <el-tag size="small" :type="statusTagType(row.status)">
-              {{ statusMap[row.status as string] || row.status }}
+              {{ statusMap[row.status] || row.status }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="提交人" width="100">
+        <el-table-column label="点击量" width="90">
           <template #default="{ row }">
-            {{ row.submitter || '-' }}
+            {{ row.clickCount ?? '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="提交时间" width="160">
+        <el-table-column label="创建时间" width="160">
           <template #default="{ row }">
             {{ formatDate(row.createdAt) }}
           </template>
@@ -125,27 +113,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { homeApi, type NewsArticle } from '@/api/homeApi'
 import { videoApi, type VideoItem } from '@/api/videoApi'
-import { merchandiseApi, type MerchandiseItem } from '@/api/merchandiseApi'
 
-const contentType = ref('NEWS')
-const statusTab = ref('')
 const page = ref(1)
 const pageSize = 10
 const total = ref(0)
-const tableData = ref<(NewsArticle | VideoItem | MerchandiseItem)[]>([])
+const tableData = ref<VideoItem[]>([])
 const loading = ref(false)
 
 const rejectDialogVisible = ref(false)
 const rejectReason = ref('')
-const currentRejectRow = ref<Record<string, unknown> | null>(null)
+const currentRejectRow = ref<VideoItem | null>(null)
 
 const offlineDialogVisible = ref(false)
 const offlineReason = ref('')
-const currentOfflineRow = ref<Record<string, unknown> | null>(null)
+const currentOfflineRow = ref<VideoItem | null>(null)
 
 const statusMap: Record<string, string> = {
   PENDING: '待审核',
@@ -155,11 +139,6 @@ const statusMap: Record<string, string> = {
   OFFLINE: '已下架',
   DRAFT: '草稿',
 }
-
-const contentTypeLabel = computed(() => {
-  const map: Record<string, string> = { NEWS: '资讯', VIDEO: '视频', MERCHANDISE: '周边' }
-  return map[contentType.value] || contentType.value
-})
 
 function statusTagType(status: string) {
   const map: Record<string, string> = {
@@ -173,33 +152,17 @@ function statusTagType(status: string) {
   return map[status] || 'info'
 }
 
-function formatDate(dateStr: unknown): string {
+function formatDate(dateStr: string): string {
   if (!dateStr) return '-'
-  return String(dateStr).substring(0, 10)
+  return dateStr.substring(0, 10)
 }
 
 async function fetchData() {
   loading.value = true
-  const params = {
-    page: page.value,
-    pageSize,
-    status: statusTab.value || undefined,
-  }
-
   try {
-    if (contentType.value === 'NEWS') {
-      const res = await homeApi.getNewsList({ ...params, pageSize: params.pageSize } as any)
-      tableData.value = res.list || []
-      total.value = res.total || 0
-    } else if (contentType.value === 'VIDEO') {
-      const res = await videoApi.pageVideos(params)
-      tableData.value = res.list || []
-      total.value = res.total || 0
-    } else if (contentType.value === 'MERCHANDISE') {
-      const res = await merchandiseApi.pageAdminProducts(params)
-      tableData.value = res.list || []
-      total.value = res.total || 0
-    }
+    const res = await videoApi.pageVideos({ page: page.value, pageSize })
+    tableData.value = res.list || []
+    total.value = res.total || 0
   } catch {
     tableData.value = []
     total.value = 0
@@ -208,28 +171,14 @@ async function fetchData() {
   }
 }
 
-function handleContentTypeChange() {
-  page.value = 1
-  fetchData()
-}
-
-function handleStatusChange() {
-  page.value = 1
-  fetchData()
-}
-
 function handlePageChange(p: number) {
   page.value = p
   fetchData()
 }
 
-async function handleApprove(row: Record<string, unknown>) {
+async function handleApprove(row: VideoItem) {
   try {
-    if (contentType.value === 'VIDEO') {
-      await videoApi.approve(row.id as number)
-    } else if (contentType.value === 'MERCHANDISE') {
-      await merchandiseApi.approve(row.id as number)
-    }
+    await videoApi.approve(row.id)
     ElMessage.success('审核通过')
     fetchData()
   } catch {
@@ -237,7 +186,7 @@ async function handleApprove(row: Record<string, unknown>) {
   }
 }
 
-function openRejectDialog(row: Record<string, unknown>) {
+function openRejectDialog(row: VideoItem) {
   currentRejectRow.value = row
   rejectReason.value = ''
   rejectDialogVisible.value = true
@@ -246,11 +195,7 @@ function openRejectDialog(row: Record<string, unknown>) {
 async function confirmReject() {
   if (!currentRejectRow.value || !rejectReason.value.trim()) return
   try {
-    if (contentType.value === 'VIDEO') {
-      await videoApi.reject(currentRejectRow.value.id as number, rejectReason.value.trim())
-    } else if (contentType.value === 'MERCHANDISE') {
-      await merchandiseApi.reject(currentRejectRow.value.id as number, rejectReason.value.trim())
-    }
+    await videoApi.reject(currentRejectRow.value.id, rejectReason.value.trim())
     ElMessage.success('已驳回')
     rejectDialogVisible.value = false
     fetchData()
@@ -259,13 +204,9 @@ async function confirmReject() {
   }
 }
 
-async function handlePublish(row: Record<string, unknown>) {
+async function handlePublish(row: VideoItem) {
   try {
-    if (contentType.value === 'VIDEO') {
-      await videoApi.publish(row.id as number)
-    } else if (contentType.value === 'MERCHANDISE') {
-      await merchandiseApi.publish(row.id as number)
-    }
+    await videoApi.publish(row.id)
     ElMessage.success('已上线')
     fetchData()
   } catch {
@@ -273,7 +214,7 @@ async function handlePublish(row: Record<string, unknown>) {
   }
 }
 
-function openOfflineDialog(row: Record<string, unknown>) {
+function openOfflineDialog(row: VideoItem) {
   currentOfflineRow.value = row
   offlineReason.value = ''
   offlineDialogVisible.value = true
@@ -282,11 +223,7 @@ function openOfflineDialog(row: Record<string, unknown>) {
 async function confirmOffline() {
   if (!currentOfflineRow.value || !offlineReason.value.trim()) return
   try {
-    if (contentType.value === 'VIDEO') {
-      await videoApi.offline(currentOfflineRow.value.id as number, offlineReason.value.trim())
-    } else if (contentType.value === 'MERCHANDISE') {
-      await merchandiseApi.offline(currentOfflineRow.value.id as number, offlineReason.value.trim())
-    }
+    await videoApi.offline(currentOfflineRow.value.id, offlineReason.value.trim())
     ElMessage.success('已下架')
     offlineDialogVisible.value = false
     fetchData()
@@ -301,7 +238,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.audit-list-page {
+.admin-video-page {
   min-height: calc(100vh - 64px);
   padding: 24px max(22px, calc((100vw - 1280px) / 2)) 72px;
   color: #f7edd5;
@@ -322,7 +259,6 @@ onMounted(() => {
 }
 
 .table-wrapper {
-  margin-top: 16px;
   border: 1px solid rgb(214 176 95 / 18%);
   border-radius: 8px;
   overflow: hidden;

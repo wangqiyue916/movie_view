@@ -5,6 +5,8 @@
       <router-link to="/admin">概览</router-link>
       <router-link to="/admin/audits">内容审核</router-link>
       <router-link to="/admin/reports">举报处理</router-link>
+      <router-link to="/admin/videos">视频管理</router-link>
+      <router-link to="/admin/merchandise">周边管理</router-link>
       <router-link to="/">返回前台</router-link>
     </aside>
     <main class="admin-main">

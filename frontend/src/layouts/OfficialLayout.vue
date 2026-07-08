@@ -5,6 +5,8 @@
       <router-link to="/official">概览</router-link>
       <router-link to="/official/certification">认证申请</router-link>
       <router-link to="/official/submissions">我的投稿</router-link>
+      <router-link to="/official/videos/submit">投稿视频</router-link>
+      <router-link to="/official/merchandise/submit">投稿周边</router-link>
       <router-link to="/">返回前台</router-link>
     </aside>
     <main class="official-main">

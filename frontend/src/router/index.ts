@@ -17,6 +17,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'long-reviews', name: 'LongReviewListPage', component: () => import('@/views/review/LongReviewListPage.vue') },
       { path: 'long-reviews/:id', name: 'LongReviewDetailPage', component: () => import('@/views/review/LongReviewDetailPage.vue') },
       { path: 'merchandise', name: 'MerchandiseListPage', component: () => import('@/views/merchandise/MerchandiseListPage.vue') },
+      { path: 'merchandise/:id', name: 'MerchandiseDetailPage', component: () => import('@/views/merchandise/MerchandiseDetailPage.vue') },
     ],
   },
   { path: '/login', name: 'LoginPage', component: () => import('@/views/auth/LoginPage.vue') },
@@ -29,6 +30,16 @@ const routes: RouteRecordRaw[] = [
       { path: '', name: 'AdminDashboardPage', component: () => import('@/views/admin/AdminDashboardPage.vue') },
       { path: 'audits', name: 'AuditListPage', component: () => import('@/views/admin/AuditListPage.vue') },
       { path: 'reports', name: 'ReportHandlePage', component: () => import('@/views/admin/ReportHandlePage.vue') },
+      {
+        path: 'videos',
+        name: 'AdminVideoPage',
+        component: () => import('@/views/admin/AdminVideoPage.vue'),
+      },
+      {
+        path: 'merchandise',
+        name: 'AdminMerchandisePage',
+        component: () => import('@/views/admin/AdminMerchandisePage.vue'),
+      },
     ],
   },
   {
@@ -39,6 +50,16 @@ const routes: RouteRecordRaw[] = [
       { path: '', name: 'OfficialDashboardPage', component: () => import('@/views/official/OfficialDashboardPage.vue') },
       { path: 'certification', name: 'CertificationPage', component: () => import('@/views/official/CertificationPage.vue') },
       { path: 'submissions', name: 'MySubmissionPage', component: () => import('@/views/official/MySubmissionPage.vue') },
+      {
+        path: 'videos/submit',
+        name: 'OfficialVideoSubmitPage',
+        component: () => import('@/views/official/OfficialVideoSubmitPage.vue'),
+      },
+      {
+        path: 'merchandise/submit',
+        name: 'OfficialMerchandiseSubmitPage',
+        component: () => import('@/views/official/OfficialMerchandiseSubmitPage.vue'),
+      },
     ],
   },
   { path: '/403', name: 'ForbiddenPage', component: () => import('@/views/error/ForbiddenPage.vue') },

@@ -15,6 +15,8 @@
     <main class="main-content">
       <router-view />
     </main>
+    <AiFloatingPet />
+    <AiChatPanel />
   </div>
 </template>
 
@@ -28,6 +30,8 @@ const router = useRouter()
 const userStore = useUserStore()
 import { useRoute } from 'vue-router'
 import UserDropdown from '@/components/common/UserDropdown.vue'
+import AiFloatingPet from '@/components/ai/AiFloatingPet.vue'
+import AiChatPanel from '@/components/ai/AiChatPanel.vue'
 
 const route = useRoute()
 
