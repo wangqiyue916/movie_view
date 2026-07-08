@@ -17,6 +17,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'long-reviews', name: 'LongReviewListPage', component: () => import('@/views/review/LongReviewListPage.vue') },
       { path: 'long-reviews/create', name: 'LongReviewCreatePage', component: () => import('@/views/review/LongReviewCreatePage.vue'), meta: { requiresAuth: true } },
       { path: 'long-reviews/:id', name: 'LongReviewDetailPage', component: () => import('@/views/review/LongReviewDetailPage.vue') },
+      { path: 'favorites', name: 'FavoritesPage', component: () => import('@/views/user/FavoritesPage.vue'), meta: { requiresAuth: true } },
       { path: 'merchandise', name: 'MerchandiseListPage', component: () => import('@/views/merchandise/MerchandiseListPage.vue') },
     ],
   },

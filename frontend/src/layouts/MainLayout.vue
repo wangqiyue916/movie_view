@@ -6,6 +6,7 @@
         <router-link to="/movies">电影</router-link>
         <a href="/news" @click="handleNewsClick">资讯</a>
         <a href="/long-reviews" @click="handleReviewsClick">长评</a>
+        <router-link to="/favorites" v-if="userStore.isLogin">收藏</router-link>
         <router-link to="/merchandise">周边</router-link>
       </nav>
       <div class="actions">
