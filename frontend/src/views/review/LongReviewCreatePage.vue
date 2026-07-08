@@ -60,7 +60,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { createReview } from '@/api/longReviewApi'
 import type { FormInstance, FormRules } from 'element-plus'
 
