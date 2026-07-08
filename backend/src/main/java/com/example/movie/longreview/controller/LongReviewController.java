@@ -46,6 +46,13 @@ public class LongReviewController {
         return ApiResponse.success(longReviewService.getMyReviews(1L, page, pageSize));
     }
 
+    @GetMapping("/favorites")
+    public ApiResponse<PageResult<LongReviewVO>> getFavoriteReviews(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        return ApiResponse.success(longReviewService.getFavoriteReviews(1L, page, pageSize));
+    }
+
     @GetMapping("/featured")
     public ApiResponse<PageResult<FeaturedReviewVO>> getFeaturedReviews(
             @RequestParam(defaultValue = "1") Integer page,

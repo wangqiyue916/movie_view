@@ -315,6 +315,21 @@ public class LongReviewServiceImpl implements LongReviewService {
     }
 
     @Override
+    public PageResult<LongReviewVO> getFavoriteReviews(Long userId, int page, int pageSize) {
+        Page<LongReview> mpPage = new Page<>(page, pageSize);
+        Page<LongReviewVO> resultPage = longReviewMapper.selectFavoriteReviews(mpPage, userId);
+        resultPage.getRecords().forEach(vo -> {
+            List<String> images = reviewImageMapper.selectImageUrlsByReviewId(vo.getId());
+            vo.setImages(images != null ? images : Collections.emptyList());
+        });
+        return new PageResult<>(
+                resultPage.getRecords(),
+                (int) resultPage.getCurrent(),
+                (int) resultPage.getSize(),
+                resultPage.getTotal());
+    }
+
+    @Override
     public PageResult<FeaturedReviewVO> getFeaturedReviews(int page, int pageSize) {
         Page<LongReview> mpPage = new Page<>(page, pageSize);
         Page<FeaturedReviewVO> resultPage = longReviewMapper.selectFeaturedReviews(mpPage);
