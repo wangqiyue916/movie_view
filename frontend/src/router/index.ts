@@ -15,7 +15,9 @@ const routes: RouteRecordRaw[] = [
       { path: 'news', name: 'NewsListPage', component: () => import('@/views/news/NewsListPage.vue') },
       { path: 'news/:id', name: 'NewsDetailPage', component: () => import('@/views/news/NewsDetailPage.vue') },
       { path: 'long-reviews', name: 'LongReviewListPage', component: () => import('@/views/review/LongReviewListPage.vue') },
+      { path: 'long-reviews/create', name: 'LongReviewCreatePage', component: () => import('@/views/review/LongReviewCreatePage.vue'), meta: { requiresAuth: true } },
       { path: 'long-reviews/:id', name: 'LongReviewDetailPage', component: () => import('@/views/review/LongReviewDetailPage.vue') },
+      { path: 'favorites', name: 'FavoritesPage', component: () => import('@/views/user/FavoritesPage.vue'), meta: { requiresAuth: true } },
       { path: 'merchandise', name: 'MerchandiseListPage', component: () => import('@/views/merchandise/MerchandiseListPage.vue') },
       { path: 'merchandise/:id', name: 'MerchandiseDetailPage', component: () => import('@/views/merchandise/MerchandiseDetailPage.vue') },
     ],
@@ -28,6 +30,7 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, roles: ['ADMIN', 'SUPER_ADMIN'] },
     children: [
       { path: '', name: 'AdminDashboardPage', component: () => import('@/views/admin/AdminDashboardPage.vue') },
+      { path: 'certifications', name: 'CertificationAuditPage', component: () => import('@/views/admin/CertificationAuditPage.vue') },
       { path: 'audits', name: 'AuditListPage', component: () => import('@/views/admin/AuditListPage.vue') },
       { path: 'reports', name: 'ReportHandlePage', component: () => import('@/views/admin/ReportHandlePage.vue') },
       {
@@ -49,6 +52,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', name: 'OfficialDashboardPage', component: () => import('@/views/official/OfficialDashboardPage.vue') },
       { path: 'certification', name: 'CertificationPage', component: () => import('@/views/official/CertificationPage.vue') },
+      { path: 'submit-news', name: 'NewsSubmissionPage', component: () => import('@/views/official/NewsSubmissionPage.vue') },
       { path: 'submissions', name: 'MySubmissionPage', component: () => import('@/views/official/MySubmissionPage.vue') },
       {
         path: 'videos/submit',
