@@ -28,6 +28,7 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, roles: ['ADMIN', 'SUPER_ADMIN'] },
     children: [
       { path: '', name: 'AdminDashboardPage', component: () => import('@/views/admin/AdminDashboardPage.vue') },
+      { path: 'certifications', name: 'CertificationAuditPage', component: () => import('@/views/admin/CertificationAuditPage.vue') },
       { path: 'audits', name: 'AuditListPage', component: () => import('@/views/admin/AuditListPage.vue') },
       { path: 'reports', name: 'ReportHandlePage', component: () => import('@/views/admin/ReportHandlePage.vue') },
     ],
@@ -39,6 +40,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', name: 'OfficialDashboardPage', component: () => import('@/views/official/OfficialDashboardPage.vue') },
       { path: 'certification', name: 'CertificationPage', component: () => import('@/views/official/CertificationPage.vue') },
+      { path: 'submit-news', name: 'NewsSubmissionPage', component: () => import('@/views/official/NewsSubmissionPage.vue') },
       { path: 'submissions', name: 'MySubmissionPage', component: () => import('@/views/official/MySubmissionPage.vue') },
     ],
   },
