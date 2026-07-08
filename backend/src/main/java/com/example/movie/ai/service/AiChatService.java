@@ -8,17 +8,21 @@ import com.example.movie.ai.mapper.AiChatSessionMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AiChatService {
 
     private final AiChatSessionMapper aiChatSessionMapper;
     private final AiChatMessageMapper aiChatMessageMapper;
+    private final LlmService llmService;
 
-    public AiChatService(AiChatSessionMapper aiChatSessionMapper, AiChatMessageMapper aiChatMessageMapper) {
+    public AiChatService(AiChatSessionMapper aiChatSessionMapper,
+                         AiChatMessageMapper aiChatMessageMapper,
+                         LlmService llmService) {
         this.aiChatSessionMapper = aiChatSessionMapper;
         this.aiChatMessageMapper = aiChatMessageMapper;
+        this.llmService = llmService;
     }
 
     public AiChatSession createSession(Long userId) {
@@ -51,52 +55,30 @@ public class AiChatService {
         userMsg.setCreatedAt(LocalDateTime.now());
         aiChatMessageMapper.insert(userMsg);
 
-        // 2. Generate AI response based on keyword matching
+        // 2. 优先调用 DeepSeek 大模型
         String response;
         String relatedType = null;
         Long relatedId = null;
 
-        String msg = message != null ? message.toLowerCase() : "";
-
-        if (containsAny(msg, "星际穿越")) {
-            response = "《星际穿越》（Interstellar）是克里斯托弗·诺兰执导的科幻电影，讲述了一组宇航员穿越虫洞寻找人类新家园的故事。电影涉及黑洞、引力时间膨胀、五维空间等科学概念，由马修·麦康纳和安妮·海瑟薇主演，汉斯·季默配乐。推荐您观看相关解读视频了解更多细节！";
-            relatedType = "MOVIE";
-            relatedId = 1L;
-        } else if (containsAny(msg, "盗梦空间")) {
-            response = "《盗梦空间》（Inception）是诺兰导演的经典之作，讲述了一群"盗梦者"通过共享梦境潜入他人潜意识的故事。电影以其多层嵌套的梦境结构和开放式结局著称，由莱昂纳多·迪卡普里奥主演。推荐您观看结局解析视频！";
-            relatedType = "MOVIE";
-            relatedId = 2L;
-        } else if (containsAny(msg, "诺兰", "nolan")) {
-            response = "克里斯托弗·诺兰（Christopher Nolan）是当代最著名的电影导演之一，代表作品包括《盗梦空间》、《星际穿越》、《蝙蝠侠：黑暗骑士》三部曲、《记忆碎片》、《敦刻尔克》、《奥本海默》等。他以复杂的非线性叙事、震撼的视觉奇观和深刻的哲学主题著称。以下为您推荐相关解读视频：\n\n1. 星际穿越深度解读：时间与爱的终极命题（Bilibili，热度1500）\n2. 诺兰电影宇宙：从盗梦空间到星际穿越（Bilibili，热度980）\n3. 盗梦空间结局解析：陀螺到底停没停（YouTube，热度2000）";
-            relatedType = "VIDEO";
-            relatedId = 1L;
-        } else if (containsAny(msg, "演员", "主演")) {
-            response = "为您推荐以下热门演员信息：\n\n1. 马修·麦康纳 - 《星际穿越》主演，凭《达拉斯买家俱乐部》获奥斯卡影帝\n2. 莱昂纳多·迪卡普里奥 - 《盗梦空间》主演，凭《荒野猎人》获奥斯卡影帝\n3. 安妮·海瑟薇 - 《星际穿越》女主演，代表作《悲惨世界》\n\n您想了解哪位演员的更多作品？";
-            relatedType = "MOVIE";
-            relatedId = 1L;
-        } else if (containsAny(msg, "导演")) {
-            response = "为您推荐以下知名导演：\n\n1. 克里斯托弗·诺兰 - 《星际穿越》《盗梦空间》《黑暗骑士》\n2. 斯蒂文·斯皮尔伯格 - 《辛德勒的名单》《拯救大兵瑞恩》\n3. 詹姆斯·卡梅隆 - 《泰坦尼克号》《阿凡达》\n\n您想了解哪位导演的更多作品？";
-            relatedType = "MOVIE";
-            relatedId = 2L;
-        } else if (containsAny(msg, "周边", "商品")) {
-            response = "为您推荐热门电影周边商品：\n\n1. 星际穿越主题海报 - ¥39.90（淘宝）\n2. 盗梦空间陀螺模型 - ¥89.00（京东）\n3. 星际穿越TARS机器人模型 - ¥299.00（淘宝）\n4. 流浪地球2金属书签套装 - ¥29.90（拼多多）\n5. 暗夜骑士蝙蝠面具收藏版 - ¥199.00（京东）\n6. 盗梦空间主题笔记本 - ¥49.90（淘宝）";
-            relatedType = "MERCHANDISE";
-            relatedId = 1L;
-        } else if (containsAny(msg, "资讯", "新闻")) {
-            response = "为您推荐最新电影资讯：\n\n1. 暑期档科幻电影热度持续升温 - 多部科幻题材影片带动观影讨论\n2. 经典高分电影长评征集活动开启 - 平台鼓励更深入的电影讨论\n3. 本周口碑片单带动二刷热度 - 高分影片长线表现回暖\n\n访问资讯页面获取更多信息！";
-            relatedType = "NEWS";
-            relatedId = 1L;
-        } else if (containsAny(msg, "视频", "解读")) {
-            response = "为您推荐热门电影解读视频：\n\n1. 星际穿越深度解读：时间与爱的终极命题（Bilibili，热度1500）\n2. 盗梦空间结局解析：陀螺到底停没停（YouTube，热度2000）\n3. 《星际穿越》科学顾问谈黑洞与五维空间（YouTube，热度1200）\n4. 诺兰电影宇宙：从盗梦空间到星际穿越（Bilibili，热度980）\n5. 盗梦空间的多层梦境结构全解析（Bilibili，热度1600）";
-            relatedType = "VIDEO";
-            relatedId = 1L;
+        String llmResponse = tryLlmChat(message, sessionId);
+        if (llmResponse != null) {
+            response = llmResponse;
         } else {
-            response = "您好！我是您的电影助手，可以帮您：\n\n🎬 推荐好看的电影和热门解读\n🎭 查询演员和导演信息\n🛍️ 发现电影周边商品\n📰 了解最新电影资讯\n🎥 观看电影解读视频\n\n您可以直接问我关于《星际穿越》、《盗梦空间》、诺兰导演等话题！";
-            relatedType = null;
-            relatedId = null;
+            // LLM 不可用时，使用关键词匹配兜底
+            String fallback = generateKeywordResponse(message);
+            response = fallback;
+            // 尝试从关键词中提取关联信息
+            String msg = message != null ? message.toLowerCase() : "";
+            if (msg.contains("星际穿越")) { relatedType = "MOVIE"; relatedId = 1L; }
+            else if (msg.contains("盗梦空间")) { relatedType = "MOVIE"; relatedId = 2L; }
+            else if (msg.contains("流浪地球")) { relatedType = "MOVIE"; relatedId = 3L; }
+            else if (msg.contains("周边") || msg.contains("商品") || msg.contains("鼠标垫")) { relatedType = "MERCHANDISE"; relatedId = 1L; }
+            else if (msg.contains("视频") || msg.contains("解读")) { relatedType = "VIDEO"; relatedId = 1L; }
+            else if (msg.contains("资讯") || msg.contains("新闻")) { relatedType = "NEWS"; relatedId = 1L; }
+            else { relatedType = "MOVIE"; relatedId = 1L; }
         }
 
-        // 3. Save AI response
+        // 3. 保存 AI 回复
         AiChatMessage aiMsg = new AiChatMessage();
         aiMsg.setSessionId(sessionId);
         aiMsg.setRole("ASSISTANT");
@@ -120,6 +102,53 @@ public class AiChatService {
 
     public void deleteSession(Long sessionId) {
         aiChatSessionMapper.deleteById(sessionId);
+    }
+
+    /**
+     * 尝试调用 DeepSeek 大模型
+     * @return AI 回复，失败返回 null
+     */
+    private String tryLlmChat(String message, Long sessionId) {
+        // 构建历史消息
+        List<Map<String, String>> history = new ArrayList<>();
+        List<AiChatMessage> msgList = getMessages(sessionId);
+        // 只取当前消息之前的历史（不含刚插入的用户消息）
+        for (int i = 0; i < msgList.size() - 1; i++) {
+            AiChatMessage m = msgList.get(i);
+            Map<String, String> entry = new LinkedHashMap<>();
+            entry.put("role", m.getRole().toLowerCase());
+            entry.put("content", m.getContent());
+            history.add(entry);
+        }
+        return llmService.chat(message, history);
+    }
+
+    /**
+     * 关键词匹配兜底回复
+     */
+    private String generateKeywordResponse(String message) {
+        if (message == null) message = "";
+        String msg = message.toLowerCase();
+
+        if (containsAny(msg, "星际穿越")) {
+            return "《星际穿越》（Interstellar）是克里斯托弗·诺兰执导的科幻电影，讲述了一组宇航员穿越虫洞寻找人类新家园的故事。电影涉及黑洞、引力时间膨胀、五维空间等科学概念，由马修·麦康纳和安妮·海瑟薇主演，汉斯·季默配乐。";
+        } else if (containsAny(msg, "盗梦空间")) {
+            return "《盗梦空间》（Inception）是诺兰导演的经典之作，讲述了一群「盗梦者」通过共享梦境潜入他人潜意识的故事。电影以其多层嵌套的梦境结构和开放式结局著称，由莱昂纳多·迪卡普里奥主演。";
+        } else if (containsAny(msg, "诺兰", "nolan")) {
+            return "克里斯托弗·诺兰代表作品包括《盗梦空间》《星际穿越》《黑暗骑士》三部曲、《记忆碎片》《敦刻尔克》《奥本海默》等。他以复杂的非线性叙事和震撼的视觉奇观著称。";
+        } else if (containsAny(msg, "演员", "主演")) {
+            return "热门演员：马修·麦康纳、莱昂纳多·迪卡普里奥、安妮·海瑟薇等。您想了解哪位演员？";
+        } else if (containsAny(msg, "导演")) {
+            return "知名导演：克里斯托弗·诺兰、斯蒂文·斯皮尔伯格、詹姆斯·卡梅隆等。您想了解哪位导演？";
+        } else if (containsAny(msg, "周边", "商品")) {
+            return "为您推荐热门电影周边：星际穿越主题海报 ¥39.90、盗梦空间陀螺模型 ¥89.00、TARS机器人模型 ¥299.00 等。";
+        } else if (containsAny(msg, "资讯", "新闻")) {
+            return "最新电影资讯：暑期档科幻电影热度持续升温，经典高分电影长评征集活动开启中。";
+        } else if (containsAny(msg, "视频", "解读")) {
+            return "热门解读视频：星际穿越深度解读（Bilibili）、盗梦空间结局解析（YouTube）、诺兰电影宇宙（Bilibili）。";
+        } else {
+            return "您好！我是电影助手，可以帮您推荐电影、查询演员导演、发现周边商品、了解最新资讯、观看解读视频。请问有什么可以帮您的？";
+        }
     }
 
     private boolean containsAny(String text, String... keywords) {

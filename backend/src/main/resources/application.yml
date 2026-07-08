@@ -24,3 +24,10 @@ logging:
     com.example.movie: debug
     com.zaxxer.hikari: trace
     org.springframework.jdbc: debug
+
+# DeepSeek 大模型配置
+deepseek:
+  api:
+    key: ${DEEPSEEK_API_KEY:your-deepseek-api-key}
+    url: https://api.deepseek.com/chat/completions
+    model: deepseek-chat

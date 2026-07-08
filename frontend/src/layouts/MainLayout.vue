@@ -22,12 +22,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/userStore'
-
-const route = useRoute()
-const router = useRouter()
-const userStore = useUserStore()
 import { useRoute } from 'vue-router'
 import UserDropdown from '@/components/common/UserDropdown.vue'
 import AiFloatingPet from '@/components/ai/AiFloatingPet.vue'
