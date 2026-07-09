@@ -90,7 +90,18 @@ import { officialApi } from '@/api/officialApi'
 
 const router = useRouter()
 
-const submissions = ref<Record<string, unknown>[]>([])
+interface SubmissionItem {
+  id: number
+  type: string
+  status: string
+  title?: string
+  name?: string
+  createdAt: string
+  clickCount?: number
+  rejectReason?: string
+}
+
+const submissions = ref<SubmissionItem[]>([])
 const loading = ref(false)
 const page = ref(1)
 const pageSize = 10
@@ -143,7 +154,7 @@ async function fetchData() {
       type: typeFilter.value || undefined,
     })
     const data = res as Record<string, unknown>
-    submissions.value = (data.list as Record<string, unknown>[]) || []
+    submissions.value = (data.list as SubmissionItem[]) || []
     total.value = (data.total as number) || 0
   } catch {
     submissions.value = []
@@ -168,7 +179,7 @@ function handlePageChange(p: number) {
   fetchData()
 }
 
-function handleResubmit(item: Record<string, unknown>) {
+function handleResubmit(item: SubmissionItem) {
   if (item.type === 'VIDEO') {
     router.push('/official/videos/submit')
   } else {
