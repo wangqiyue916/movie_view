@@ -24,6 +24,7 @@
       </div>
     </div>
 
+    <!-- 骨架屏加载状态（潘玺名，2025-07-08）：数据加载期间显示占位卡片，避免白屏 -->
     <div v-if="loading" class="loading-skeleton">
       <SkeletonCard v-for="n in 6" :key="n" height="200px" />
     </div>

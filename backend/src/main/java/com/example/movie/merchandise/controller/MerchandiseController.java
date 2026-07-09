@@ -53,7 +53,7 @@ public class MerchandiseController {
         return ApiResponse.success(m);
     }
 
-    @GetMapping("/by-movie/{movieId}")
+    @GetMapping({"/by-movie/{movieId}", "/movie/{movieId}"})
     public ApiResponse<List<Merchandise>> listByMovie(@PathVariable Long movieId) {
         List<Merchandise> list = merchandiseService.listByMovie(movieId);
         return ApiResponse.success(list);

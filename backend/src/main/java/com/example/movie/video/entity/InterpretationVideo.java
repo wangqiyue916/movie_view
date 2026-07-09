@@ -25,7 +25,7 @@ public class InterpretationVideo {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @TableLogic
+    @TableLogic(value = "null", delval = "now()")
     private LocalDateTime deletedAt;
 
     public Long getId() {
