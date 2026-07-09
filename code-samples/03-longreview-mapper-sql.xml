@@ -1,0 +1,123 @@
+<!--
+============================================================
+PPT代码展示 3 / 7 — MyBatis 多表关联 SQL 设计
+郭俊岑 负责：长评社区与讨论模块
+============================================================
+
+【核心问题】如何高效查询长评列表并关联用户互动状态？
+
+我的设计思路：
+  ① 使用 MyBatis XML Mapper 实现复杂多表 JOIN
+  ② 用 LEFT JOIN 关联 movies 表获取电影名、users 表获取作者昵称
+  ③ 用 CASE WHEN 子查询判断当前用户是否已点赞、已收藏
+     (返回 0 或 1，前端据此高亮按钮)
+  ④ 热度排序公式：点赞*1 + 浏览*0.1 + 回复*2 + 收藏*3
+     这个公式是我根据交互重要程度人为设定的权重
+  ⑤ 使用 MyBatis 的 <if> 和 <choose> 实现动态 SQL
+-->
+
+<mapper namespace="com.example.movie.longreview.mapper.LongReviewMapper">
+
+    <!-- ===== 连表返回的 VO 对象映射 ===== -->
+    <resultMap id="reviewVOMap" type="com.example.movie.longreview.vo.LongReviewVO">
+        <id column="id" property="id"/>
+        <result column="movie_id"      property="movieId"/>
+        <result column="movie_title"   property="movieTitle"/>
+        <result column="author_nickname" property="authorNickname"/>
+        <result column="content_md"    property="contentMd"/>
+        <result column="status"        property="status"/>
+        <result column="view_count"    property="viewCount"/>
+        <result column="like_count"    property="likeCount"/>
+        <result column="favorite_count" property="favoriteCount"/>
+        <result column="reply_count"   property="replyCount"/>
+        <result column="liked"         property="liked"/>       <!-- 当前用户是否赞过 -->
+        <result column="favorited"     property="favorited"/>   <!-- 当前用户是否收藏过 -->
+        <result column="is_featured"   property="isFeatured"/>
+        <result column="created_at"    property="createdAt"/>
+    </resultMap>
+
+    <!-- ===== 长评列表查询（多表关联 + 动态排序） ===== -->
+    <select id="selectReviewPage" resultMap="reviewVOMap">
+        SELECT
+            lr.*,
+            m.title AS movie_title,
+            u.nickname AS author_nickname,
+            u.avatar_url AS author_avatar,
+            -- 判断当前用户是否已点赞
+            CASE WHEN lk.id IS NOT NULL THEN 1 ELSE 0 END AS liked,
+            -- 判断当前用户是否已收藏
+            CASE WHEN fv.id IS NOT NULL THEN 1 ELSE 0 END AS favorited
+        FROM long_reviews lr
+        LEFT JOIN movies m  ON lr.movie_id = m.id
+        LEFT JOIN users u   ON lr.user_id = u.id
+        LEFT JOIN likes lk  ON lk.target_type = 'LONG_REVIEW'
+                            AND lk.target_id = lr.id
+                            AND lk.user_id = #{currentUserId}
+        LEFT JOIN favorites fv ON fv.target_type = 'LONG_REVIEW'
+                               AND fv.target_id = lr.id
+                               AND fv.user_id = #{currentUserId}
+        WHERE lr.deleted_at IS NULL  -- 软删除：不真实删除数据
+        <if test="movieId != null">
+            AND lr.movie_id = #{movieId}
+        </if>
+        <!-- 动态排序：根据前端传来的 sortBy 参数 -->
+        <choose>
+            <when test="sortBy == 'hot'">
+                -- 热度公式：点赞*1 + 浏览*0.1 + 回复*2 + 收藏*3
+                ORDER BY (lr.like_count * 1
+                        + lr.view_count * 0.1
+                        + lr.reply_count * 2
+                        + lr.favorite_count * 3) DESC
+            </when>
+            <otherwise>
+                ORDER BY lr.created_at DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- ===== 精选长评（首页"优质长评"模块） ===== -->
+    <select id="selectFeaturedReviews" resultMap="featuredVOMap">
+        SELECT
+            lr.id, lr.title,
+            SUBSTRING(lr.content_md, 1, 200) AS summary,  -- 只取前200字做摘要
+            lr.like_count, lr.favorite_count, lr.reply_count, lr.view_count,
+            (lr.like_count * 1 + lr.view_count * 0.1
+             + lr.reply_count * 2 + lr.favorite_count * 3) AS hot_score,
+            m.title AS movie_title,
+            u.nickname AS author_nickname
+        FROM long_reviews lr
+        LEFT JOIN movies m ON lr.movie_id = m.id
+        LEFT JOIN users u  ON lr.user_id = u.id
+        WHERE lr.deleted_at IS NULL
+          AND lr.status = 'ONLINE'       -- 只展示已上线的内容
+          AND lr.is_featured = 1         -- 只展示被管理员精选的
+        ORDER BY lr.featured_at DESC, hot_score DESC
+    </select>
+
+    <!-- ===== 我的收藏列表 ===== -->
+    <select id="selectFavoriteReviews" resultMap="reviewVOMap">
+        SELECT lr.*, m.title AS movie_title, u.nickname AS author_nickname,
+               CASE WHEN lk.id IS NOT NULL THEN 1 ELSE 0 END AS liked,
+               CASE WHEN fv2.id IS NOT NULL THEN 1 ELSE 0 END AS favorited
+        FROM long_reviews lr
+        INNER JOIN favorites fv ON fv.target_type = 'LONG_REVIEW'
+               AND fv.target_id = lr.id AND fv.user_id = #{userId}
+        LEFT JOIN movies m ON lr.movie_id = m.id
+        LEFT JOIN users u  ON lr.user_id = u.id
+        WHERE lr.deleted_at IS NULL
+        ORDER BY fv.created_at DESC  -- 按收藏时间倒序
+    </select>
+</mapper>
+
+<!--
+【PPT讲解提示】
+"这一页展示的是 MyBatis 的 SQL 映射文件。
+ 我负责设计了这个多表关联查询——通过 4 个 LEFT JOIN 把
+ long_reviews、movies、users、likes、favorites 五张表的数据
+ 合并为一条查询结果，避免了 N+1 次查询的性能问题。
+ 热度排序公式中，我给了收藏 3 倍权重、回复 2 倍权重，
+ 因为这些交互行为的成本比单纯浏览更高，更能代表内容质量。
+ CASE WHEN 语句是亮点——它在同一条 SQL 中判断了当前用户
+ 是否已点赞/收藏，前端直接用布尔值控制按钮高亮，
+ 不需要发额外的请求。"
+-->
