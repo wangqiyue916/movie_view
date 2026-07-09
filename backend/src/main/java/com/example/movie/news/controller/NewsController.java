@@ -53,6 +53,14 @@ public class NewsController {
                         .filter(n -> category.equals(n.getCategory()))
                         .toList();
             }
+        } else {
+            // 修复数据库中被错误覆盖为本地路径的封面图
+            records.forEach(n -> {
+                String cv = n.getCoverUrl();
+                if (cv == null || cv.isBlank() || cv.startsWith("/merch-") || cv.startsWith("/")) {
+                    n.setCoverUrl(mockCoverUrl(n.getId() != null ? n.getId().intValue() : 0));
+                }
+            });
         }
 
         return ApiResponse.success(new PageResult<>(
@@ -119,6 +127,20 @@ public class NewsController {
             list.add(r);
         }
         return list;
+    }
+
+    private String mockCoverUrl(int idx) {
+        String[] fallbacks = {
+            "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85",
+            "https://images.unsplash.com/photo-1524985066-dd778a71c7b4?auto=format&fit=crop&w=900&q=85",
+            "https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=900&q=85",
+            "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=85",
+            "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=85",
+            "https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=900&q=85",
+            "https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=900&q=85",
+            "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=900&q=85",
+        };
+        return fallbacks[Math.abs(idx) % fallbacks.length];
     }
 
     private List<NewsArticle> buildMockNewsList() {

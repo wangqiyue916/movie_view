@@ -25,12 +25,20 @@ export interface NewsRelation {
 
 export interface HomeData {
   bannerNews: NewsArticle[]
+  bannerRecs: RecCard[]
   latestNews: NewsArticle[]
   hotMovies: MovieItem[]
   topRatedMovies: MovieItem[]
   latestMovies: MovieItem[]
   featuredReviews: ReviewItem[]
   recommendedMerchandise: MerchItem[]
+}
+
+export interface RecCard {
+  id: number
+  title: string
+  image: string
+  targetType: string
 }
 
 export interface MovieItem {

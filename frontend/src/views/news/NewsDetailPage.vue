@@ -8,7 +8,7 @@
     <article v-else class="news-article">
       <router-link to="/news" class="back-link">← 返回资讯列表</router-link>
 
-      <div v-if="news.coverUrl" class="cover-wrapper">
+      <div v-if="news.coverUrl && !isBadCover(news.coverUrl)" class="cover-wrapper">
         <img :src="news.coverUrl" :alt="news.title" />
       </div>
 
@@ -150,6 +150,10 @@ const renderedContent = computed(() => {
 function formatDate(dateStr: string) {
   if (!dateStr) return ''
   return dateStr.substring(0, 10)
+}
+
+function isBadCover(url: string): boolean {
+  return !url || url.startsWith('/merch-') || url.startsWith('/')
 }
 
 onMounted(async () => {

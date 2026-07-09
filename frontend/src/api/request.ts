@@ -29,16 +29,32 @@ request.interceptors.response.use(
     }
     if (result.code === 401) {
       localStorage.removeItem('token')
-      router.push('/login')
+      // 不在登录页时才跳转，避免吞掉登录页的错误提示
+      if (router.currentRoute.value.name !== 'LoginPage') {
+        router.push('/login')
+      }
+      ElMessage.error(result.message || '请求失败')
+      return Promise.reject(result)
     }
     if (result.code === 403) {
       router.push('/403')
+      ElMessage.error(result.message || '请求失败')
+      return Promise.reject(result)
     }
-    ElMessage.error(result.message || '请求失败')
+    // 其他业务错误（400/404/409/500）不在拦截器中弹 toast，
+    // 由调用方 .catch() 自行决定是否提示，避免辅助接口失败污染用户体验
     return Promise.reject(result)
   },
   (error) => {
-    ElMessage.error(error?.message || '网络异常')
+    // Axios 网络/超时错误才有 message，避免弹出两条相同消息
+    if (error?.response?.status === 401) {
+      localStorage.removeItem('token')
+      if (router.currentRoute.value.name !== 'LoginPage') {
+        router.push('/login')
+      }
+    } else if (error?.response?.status !== 403) {
+      ElMessage.error(error?.message || '网络异常')
+    }
     return Promise.reject(error)
   },
 )

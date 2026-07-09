@@ -135,6 +135,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading, Plus, Edit, Delete } from '@element-plus/icons-vue'
+import request from '@/api/request'
 
 interface RecommendItem {
   id: number
@@ -147,7 +148,6 @@ interface RecommendItem {
   enabled: number
 }
 
-const apiBase = import.meta.env.VITE_API_BASE_URL || '/api'
 const list = ref<RecommendItem[]>([])
 const loading = ref(false)
 const currentSection = ref('BANNER_NEWS')
@@ -156,7 +156,7 @@ const editingItem = ref<RecommendItem | null>(null)
 const saving = ref(false)
 
 const sections = [
-  { value: 'BANNER_NEWS', label: '顶部轮播资讯' },
+  { value: 'BANNER_NEWS', label: '顶部轮播' },
   { value: 'HOT_MOVIE', label: '热门电影' },
   { value: 'FEATURED_REVIEW', label: '精选长评' },
   { value: 'RECOMMEND_MERCH', label: '推荐周边' },
@@ -187,14 +187,12 @@ function typeLabel(t: string) {
 async function fetchList() {
   loading.value = true
   try {
-    const token = localStorage.getItem('token') || ''
-    const r = await fetch(`${apiBase}/admin/homepage-recommendations?sectionCode=${currentSection.value}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const res: any = await request.get('/admin/homepage-recommendations', {
+      params: { sectionCode: currentSection.value },
     })
-    const j = await r.json()
-    list.value = (j.data || []) as RecommendItem[]
+    list.value = (res || []) as RecommendItem[]
   } catch {
-    ElMessage.error('加载失败')
+    list.value = []
   } finally {
     loading.value = false
   }
@@ -219,26 +217,17 @@ function openEditDialog(item: RecommendItem) {
 
 async function handleSave() {
   saving.value = true
-  const token = localStorage.getItem('token') || ''
-  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
-  const body = JSON.stringify(form.value)
   try {
-    let r: Response
     if (editingItem.value) {
-      r = await fetch(`${apiBase}/admin/homepage-recommendations/${editingItem.value.id}`, { method: 'PUT', headers, body })
+      await request.put(`/admin/homepage-recommendations/${editingItem.value.id}`, form.value)
     } else {
-      r = await fetch(`${apiBase}/admin/homepage-recommendations`, { method: 'POST', headers, body })
+      await request.post('/admin/homepage-recommendations', form.value)
     }
-    const j = await r.json()
-    if (j.code === 0) {
-      ElMessage.success(editingItem.value ? '修改成功' : '新增成功')
-      dialogVisible.value = false
-      fetchList()
-    } else {
-      ElMessage.error(j.message || '操作失败')
-    }
+    ElMessage.success(editingItem.value ? '修改成功' : '新增成功')
+    dialogVisible.value = false
+    fetchList()
   } catch {
-    ElMessage.error('网络异常')
+    // error handled by interceptor
   } finally {
     saving.value = false
   }
@@ -248,42 +237,23 @@ async function handleDelete(item: RecommendItem) {
   try {
     await ElMessageBox.confirm(`确定删除推荐「${item.title || '无标题'}」？`, '确认删除', { type: 'warning' })
   } catch { return }
-  const token = localStorage.getItem('token') || ''
   try {
-    const r = await fetch(`${apiBase}/admin/homepage-recommendations/${item.id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-     })
-    const j = await r.json()
-    if (j.code === 0) {
-      ElMessage.success('已删除')
-      fetchList()
-    } else {
-      ElMessage.error(j.message || '删除失败')
-    }
+    await request.delete(`/admin/homepage-recommendations/${item.id}`)
+    ElMessage.success('已删除')
+    fetchList()
   } catch {
-    ElMessage.error('网络异常')
+    // error handled by interceptor
   }
 }
 
 async function toggleEnabled(item: RecommendItem) {
-  const token = localStorage.getItem('token') || ''
   const newEnabled = item.enabled ? 0 : 1
   try {
-    const r = await fetch(`${apiBase}/admin/homepage-recommendations/${item.id}`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enabled: newEnabled }),
-    })
-    const j = await r.json()
-    if (j.code === 0) {
-      ElMessage.success(newEnabled ? '已启用' : '已禁用')
-      fetchList()
-    } else {
-      ElMessage.error(j.message || '操作失败')
-    }
+    await request.put(`/admin/homepage-recommendations/${item.id}`, { enabled: newEnabled })
+    ElMessage.success(newEnabled ? '已启用' : '已禁用')
+    fetchList()
   } catch {
-    ElMessage.error('网络异常')
+    // error handled by interceptor
   }
 }
 
@@ -291,16 +261,15 @@ async function moveItem(idx: number, direction: number) {
   const a = list.value[idx]
   const b = list.value[idx + direction]
   if (!a || !b) return
-  const token = localStorage.getItem('token') || ''
-  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
   try {
     await Promise.all([
-      fetch(`${apiBase}/admin/homepage-recommendations/${a.id}`, { method: 'PUT', headers, body: JSON.stringify({ sortOrder: b.sortOrder }) }),
-      fetch(`${apiBase}/admin/homepage-recommendations/${b.id}`, { method: 'PUT', headers, body: JSON.stringify({ sortOrder: a.sortOrder }) }),
+      request.put(`/admin/homepage-recommendations/${a.id}`, { sortOrder: b.sortOrder }),
+      request.put(`/admin/homepage-recommendations/${b.id}`, { sortOrder: a.sortOrder }),
     ])
+    ElMessage.success('排序已更新')
     fetchList()
   } catch {
-    ElMessage.error('排序失败')
+    // error handled by interceptor
   }
 }
 

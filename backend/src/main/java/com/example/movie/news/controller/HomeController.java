@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,7 +42,7 @@ public class HomeController {
 
     /**
      * GET /api/home/recommendations?sectionCode=BANNER_NEWS
-     * 获取指定区域的推荐位列表
+     * 获取指定区域的推荐位列表（供管理员后台使用）
      */
     @GetMapping("/recommendations")
     public ApiResponse<List<HomepageRecommendation>> recommendations(
@@ -66,13 +65,13 @@ public class HomeController {
     public ApiResponse<Map<String, Object>> homeData() {
         Map<String, Object> data = new LinkedHashMap<>();
 
-        // 轮播资讯（数据库有则查数据库，无则 Mock）
-        List<com.example.movie.news.entity.NewsArticle> bannerNews = newsService.getHotNews(4);
-        data.put("bannerNews", bannerNews.isEmpty() ? buildMockNews(4) : bannerNews);
+        // ===== 顶部轮播：从管理员推荐位获取电影，无配置时自动使用热门电影 =====
+        List<Map<String, Object>> bannerRecs = buildBannerRecsFromRecommendations();
+        data.put("bannerRecs", bannerRecs);
 
-        // 最新资讯 top 8（数据库有则查数据库，无则 Mock）
-        List<com.example.movie.news.entity.NewsArticle> latestNews = newsService.getLatestNews(8);
-        data.put("latestNews", latestNews.isEmpty() ? buildMockNews(8) : latestNews);
+        // 最新资讯 top 4（数据库有则查数据库，无则不展示）
+        List<com.example.movie.news.entity.NewsArticle> latestNews = newsService.getLatestNews(4);
+        data.put("latestNews", latestNews.isEmpty() ? List.of() : latestNews);
 
         data.put("hotMovies", buildHotMovies());
 
@@ -84,10 +83,51 @@ public class HomeController {
         List<Map<String, Object>> featuredReviews = buildFeaturedReviews();
         data.put("featuredReviews", featuredReviews.isEmpty() ? buildMockFeaturedReviews() : featuredReviews);
 
-        // TODO: 对接周秋宏 - 推荐周边 Mock
         data.put("recommendedMerchandise", buildMockMerchandise());
 
         return ApiResponse.success(data);
+    }
+
+    /** 从 homepage_recommendations 表读取 BANNER_NEWS 推荐位，组装轮播卡片 */
+    private List<Map<String, Object>> buildBannerRecsFromRecommendations() {
+        List<HomepageRecommendation> recs = recommendationMapper.selectList(
+            new LambdaQueryWrapper<HomepageRecommendation>()
+                .eq(HomepageRecommendation::getSectionCode, "BANNER_NEWS")
+                .eq(HomepageRecommendation::getEnabled, 1)
+                .orderByAsc(HomepageRecommendation::getSortOrder)
+        );
+        // 只取类型为 MOVIE 的推荐位；管理员未配置时自动用热门电影
+        List<HomepageRecommendation> movieRecs = recs.stream()
+            .filter(r -> "MOVIE".equals(r.getTargetType()))
+            .toList();
+
+        if (movieRecs.isEmpty()) {
+            List<MovieEntity> movies = movieMapper.selectList(
+                new LambdaQueryWrapper<MovieEntity>().eq(MovieEntity::getStatus, "ONLINE").last("LIMIT 4"));
+            List<Map<String, Object>> cards = new ArrayList<>();
+            for (MovieEntity m : movies) {
+                Map<String, Object> card = new LinkedHashMap<>();
+                card.put("id", m.getId());
+                card.put("title", m.getTitle());
+                // 处理空字符串或 null 的海报链接
+                String poster = (m.getPosterUrl() == null || m.getPosterUrl().isBlank()) ? "" : m.getPosterUrl();
+                card.put("image", poster);
+                card.put("targetType", "MOVIE");
+                cards.add(card);
+            }
+            return cards;
+        }
+        List<Map<String, Object>> cards = new ArrayList<>();
+        for (HomepageRecommendation r : movieRecs) {
+            Map<String, Object> card = new LinkedHashMap<>();
+            card.put("id", r.getTargetId());
+            card.put("title", r.getTitle() != null ? r.getTitle() : "");
+            String img = (r.getImageUrl() == null || r.getImageUrl().isBlank()) ? "" : r.getImageUrl();
+            card.put("image", img);
+            card.put("targetType", r.getTargetType());
+            cards.add(card);
+        }
+        return cards;
     }
 
     private List<Map<String, Object>> buildHotMovies() {
@@ -128,55 +168,32 @@ public class HomeController {
     }
 
     private List<Map<String, Object>> buildMockFeaturedReviews() {
-        List<Map<String, Object>> list = new ArrayList<>();
-        Map<String, Object> r1 = new LinkedHashMap<>();
-        r1.put("id", 1L);
-        r1.put("title", "穿越星际之后，仍然回到人的情感");
-        r1.put("excerpt", "它最动人的地方，是把宏大的宇宙尺度和具体的人之间重新连接起来。");
-        r1.put("author", "影评人 Mori");
-        r1.put("date", "2026-07-06");
-        r1.put("likes", 32);
-        r1.put("comments", 5);
-        list.add(r1);
-
-        Map<String, Object> r2 = new LinkedHashMap<>();
-        r2.put("id", 2L);
-        r2.put("title", "梦境不是谜题，而是欲望的回声");
-        r2.put("excerpt", "真正让人反复回看的，并不只是结构，还有每一层梦境背后未被说破的执念。");
-        r2.put("author", "用户 北辰");
-        r2.put("date", "2026-07-05");
-        r2.put("likes", 24);
-        r2.put("comments", 7);
-        list.add(r2);
-
-        Map<String, Object> r3 = new LinkedHashMap<>();
-        r3.put("id", 3L);
-        r3.put("title", "灾难片里的群像，为什么仍然能打动人");
-        r3.put("excerpt", "当宏大工程、末日危机和个体选择并置时，电影真正要讨论的不是奇观本身。");
-        r3.put("author", "用户 山止川行");
-        r3.put("date", "2026-07-04");
-        r3.put("likes", 18);
-        r3.put("comments", 3);
-        list.add(r3);
-
-        return list;
+        // 数据库无长评时返回空列表，不显示 mock 数据
+        return List.of();
     }
 
     private List<Map<String, Object>> buildFeaturedReviews() {
-        Page<FeaturedReviewVO> page = longReviewMapper.selectFeaturedReviews(new Page<LongReview>(1, 3));
-        List<Map<String, Object>> list = new ArrayList<>();
-        for (FeaturedReviewVO review : page.getRecords()) {
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("id", review.getId());
-            item.put("title", review.getTitle());
-            item.put("excerpt", review.getSummary());
-            item.put("author", review.getAuthorNickname());
-            item.put("date", review.getCreatedAt() == null ? null : review.getCreatedAt().toLocalDate().toString());
-            item.put("likes", review.getLikeCount());
-            item.put("comments", review.getReplyCount());
-            list.add(item);
+        try {
+            Page<FeaturedReviewVO> page = longReviewMapper.selectFeaturedReviews(new Page<LongReview>(1, 3));
+            if (page == null || page.getRecords() == null) return List.of();
+            List<Map<String, Object>> list = new ArrayList<>();
+            for (FeaturedReviewVO review : page.getRecords()) {
+                if (review == null) continue;
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("id", review.getId());
+                item.put("title", review.getTitle());
+                item.put("excerpt", review.getSummary());
+                item.put("author", review.getAuthorNickname());
+                item.put("date", review.getCreatedAt() == null ? null : review.getCreatedAt().toLocalDate().toString());
+                item.put("likes", review.getLikeCount());
+                item.put("comments", review.getReplyCount());
+                list.add(item);
+            }
+            return list;
+        } catch (Exception e) {
+            // 若精选长评查询异常（表不存在/字段缺失），降级 Mock
+            return List.of();
         }
-        return list;
     }
 
     private List<Map<String, Object>> buildMockMerchandise() {
@@ -203,36 +220,5 @@ public class HomeController {
         map.put("image", image);
         map.put("price", price);
         return map;
-    }
-
-    /**
-     * Mock 资讯数据（数据库无数据时的降级方案）
-     */
-    private List<com.example.movie.news.entity.NewsArticle> buildMockNews(int count) {
-        String[][] mockData = {
-            {"新片动态", "暑期档科幻电影热度持续升温", "多部科幻题材影片带动观影讨论，视觉效果、叙事表达与人物塑造成为关注焦点。", "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85"},
-            {"平台活动", "经典高分电影长评征集活动开启", "平台将根据点赞数、收藏数和回复数推荐优质长评，鼓励更深入的电影讨论。", "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=900&q=85"},
-            {"票房观察", "本周口碑片单带动二刷热度", "高分影片的长线表现正在回暖，讨论度集中在角色关系、主题表达和视听风格。", "https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=900&q=85"},
-            {"幕后花絮", "导演特辑公开多场关键戏拍摄细节", "主创团队分享场景搭建、镜头调度和音乐设计，让观众更深入理解影片创作过程。", "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=85"},
-            {"演员动态", "多位主演新片计划进入筹备阶段", "演员阵容、角色设定和类型方向陆续曝光，相关话题持续登上讨论榜。", "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=85"},
-            {"获奖信息", "年度电影奖项公布入围名单", "剧情片、科幻片和动画片竞争激烈，摄影、美术和原创音乐单元关注度提升。", "https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=900&q=85"},
-            {"行业观察", "流媒体与院线窗口期继续调整", "多平台尝试新的发行节奏，观众观影习惯和影片宣发策略都在发生变化。", "https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=900&q=85"},
-            {"周边资讯", "热门电影主题周边开启预售", "海报、徽章、角色模型和限定文创陆续上架，收藏向商品受到影迷关注。", "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=900&q=85"},
-        };
-
-        List<com.example.movie.news.entity.NewsArticle> list = new ArrayList<>();
-        for (int i = 0; i < count && i < mockData.length; i++) {
-            com.example.movie.news.entity.NewsArticle news = new com.example.movie.news.entity.NewsArticle();
-            news.setId((long) (i + 1));
-            news.setCategory(mockData[i][0]);
-            news.setTitle(mockData[i][1]);
-            news.setSummary(mockData[i][2]);
-            news.setCoverUrl(mockData[i][3]);
-            news.setSource("平台编辑");
-            news.setViewCount(1000L + i * 500);
-            news.setPublishedAt(LocalDateTime.now().minusDays(i));
-            list.add(news);
-        }
-        return list;
     }
 }

@@ -342,4 +342,92 @@ onMounted(() => {
   justify-content: center;
   margin-top: 28px;
 }
+
+/* ===== Dark Theme Tabs ===== */
+:deep(.el-tabs__header) {
+  border-bottom-color: rgba(214, 176, 95, 0.15);
+}
+
+:deep(.el-tabs__item) {
+  color: #7a6e58;
+  font-size: 14px;
+}
+
+:deep(.el-tabs__item:hover) {
+  color: #d8c69b;
+}
+
+:deep(.el-tabs__item.is-active) {
+  color: #e8c16d;
+}
+
+:deep(.el-tabs__active-bar) {
+  background-color: #d6b05f;
+}
+
+/* ===== Dark Theme Table (匹配管理后台金色暗黑风格) ===== */
+:deep(.el-table) {
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: rgba(214, 176, 95, 0.08);
+  --el-table-border-color: rgba(214, 176, 95, 0.12);
+  --el-table-text-color: #b9ab90;
+  --el-table-header-text-color: #e8c16d;
+  --el-table-row-hover-bg-color: rgba(214, 176, 95, 0.06);
+  background-color: transparent;
+  color: #b9ab90;
+}
+
+:deep(.el-table__header-wrapper th.el-table__cell) {
+  background-color: rgba(214, 176, 95, 0.08);
+  color: #e8c16d;
+  font-weight: 600;
+  border-color: rgba(214, 176, 95, 0.15);
+}
+
+:deep(.el-table__body-wrapper td.el-table__cell) {
+  background-color: transparent;
+  border-color: rgba(214, 176, 95, 0.08);
+  color: #b9ab90;
+}
+
+:deep(.el-table tr:hover > td.el-table__cell) {
+  background-color: rgba(214, 176, 95, 0.06);
+}
+
+:deep(.el-table .el-table__inner-wrapper::before) {
+  display: none;
+}
+
+:deep(.el-table--border::after),
+:deep(.el-table--border::before),
+:deep(.el-table__inner-wrapper::before) {
+  background-color: rgba(214, 176, 95, 0.15);
+}
+
+/* Pagination dark override */
+:deep(.el-pagination .btn-prev),
+:deep(.el-pagination .btn-next),
+:deep(.el-pagination .el-pager li) {
+  background: rgba(214, 176, 95, 0.06) !important;
+  color: #b9ab90 !important;
+  border: 1px solid rgba(214, 176, 95, 0.15);
+}
+
+:deep(.el-pagination .el-pager li.is-active) {
+  background: rgba(214, 176, 95, 0.2) !important;
+  color: #e8c16d !important;
+  font-weight: 600;
+}
+
+:deep(.el-pagination .el-pager li:hover:not(.is-active)) {
+  background: rgba(214, 176, 95, 0.12) !important;
+  color: #d8c69b !important;
+}
+
+:deep(.el-pagination button:disabled) {
+  background: transparent !important;
+  color: #5a5040 !important;
+  opacity: 0.4;
+}
 </style>

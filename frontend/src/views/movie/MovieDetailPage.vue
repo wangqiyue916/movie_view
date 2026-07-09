@@ -25,14 +25,14 @@
           <p class="side-panel-title">评分</p>
           <div class="rating-content">
             <div class="rating-main">
-              <span class="big-score">{{ movie.avgTotalScore ?? '—' }}</span>
+              <span class="big-score">{{ movie.avgTotalScore != null ? (movie.avgTotalScore / 2).toFixed(1) : '—' }}</span>
               <span class="big-score-label">总评分</span>
               <span class="rating-count">{{ movie.ratingCount }} 人评分</span>
             </div>
             <div class="rating-subs">
-              <RatingDisplay :rating="movie.avgStoryScore" label="剧情" size="small" />
-              <RatingDisplay :rating="movie.avgVisualScore" label="特效" size="small" />
-              <RatingDisplay :rating="movie.avgActingScore" label="演技" size="small" />
+              <RatingDisplay :rating="movie.avgStoryScore != null ? movie.avgStoryScore / 2 : null" label="剧情" size="small" />
+              <RatingDisplay :rating="movie.avgVisualScore != null ? movie.avgVisualScore / 2 : null" label="特效" size="small" />
+              <RatingDisplay :rating="movie.avgActingScore != null ? movie.avgActingScore / 2 : null" label="演技" size="small" />
             </div>
           </div>
         </div>
@@ -80,7 +80,9 @@
     <!-- Long Reviews -->
     <section class="section">
       <SectionHeading title="长评" />
-      <PlaceholderPanel title="长评区域" description="发布长评前需要先完成电影评分，长评功能将由郭俊岑同学实现" />
+      <div class="section-empty">
+        <span>暂无长评</span>
+      </div>
     </section>
 
     <!-- Related News -->
@@ -183,7 +185,6 @@ import SectionHeading from '@/components/movie/SectionHeading.vue'
 import RatingDisplay from '@/components/movie/RatingDisplay.vue'
 import StarRating from '@/components/movie/StarRating.vue'
 import ShortCommentList from '@/components/comment/ShortCommentList.vue'
-import PlaceholderPanel from '@/components/common/PlaceholderPanel.vue'
 
 const route = useRoute()
 const router = useRouter()

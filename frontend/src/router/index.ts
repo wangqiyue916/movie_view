@@ -44,6 +44,11 @@ const routes: RouteRecordRaw[] = [
         name: 'AdminMerchandisePage',
         component: () => import('@/views/admin/AdminMerchandisePage.vue'),
       },
+      {
+        path: 'users',
+        name: 'UserManagementPage',
+        component: () => import('@/views/admin/UserManagementPage.vue'),
+      },
     ],
   },
   {
@@ -76,10 +81,21 @@ const router = createRouter({
   routes,
 })
 
+let fetchingPromise: Promise<void> | null = null
+
 router.beforeEach(async (to) => {
   const userStore = useUserStore()
   if (userStore.token && !userStore.userInfo) {
-    await userStore.fetchCurrentUser().catch(() => userStore.logout())
+    // 防止并发多个 fetchCurrentUser 导致"跳两次 500"
+    if (!fetchingPromise) {
+      fetchingPromise = userStore.fetchCurrentUser()
+        .finally(() => { fetchingPromise = null })
+    }
+    try {
+      await fetchingPromise
+    } catch {
+      userStore.logout()
+    }
   }
   if (to.meta.requiresAuth && !userStore.isLogin) {
     return '/login'

@@ -34,6 +34,10 @@
           <el-icon><Goods /></el-icon>
           <span>周边管理</span>
         </router-link>
+        <router-link to="/admin/users" v-if="userStore.hasRole('SUPER_ADMIN')" class="super-link">
+          <el-icon><UserFilled /></el-icon>
+          <span>用户管理</span>
+        </router-link>
       </nav>
       <div class="sidebar-footer">
         <router-link to="/">
@@ -49,7 +53,10 @@
 </template>
 
 <script setup lang="ts">
-import { DataAnalysis, Checked, WarningFilled, Back, Stamp, HomeFilled, VideoCamera, Goods } from '@element-plus/icons-vue'
+import { DataAnalysis, Checked, WarningFilled, Back, Stamp, HomeFilled, VideoCamera, Goods, UserFilled } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/userStore'
+
+const userStore = useUserStore()
 </script>
 
 <style scoped>
