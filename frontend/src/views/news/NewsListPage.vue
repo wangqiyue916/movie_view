@@ -41,7 +41,7 @@
       >
         <div class="news-card-cover">
           <img
-            :src="news.coverUrl || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'"
+            :src="news.coverUrl || '/merch-shubiao.png'"
             :alt="news.title"
           />
           <span v-if="news.category" class="news-category-tag">{{ news.category }}</span>

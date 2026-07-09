@@ -1,4 +1,4 @@
-SET NAMES utf8mb4;
+﻿SET NAMES utf8mb4;
 SET time_zone = '+08:00';
 
 USE `movie`;
@@ -334,8 +334,8 @@ ON DUPLICATE KEY UPDATE title = VALUES(title), status = VALUES(status), updated_
 INSERT INTO `movie`.`news_articles` (
   id, title, summary, content, cover_url, category, source, status, view_count, is_hot, published_at
 ) VALUES
-(1, '暑期档科幻电影热度持续升温', '多部科幻电影带动观影讨论热潮。', '暑期档多部科幻题材影片受到关注，观众围绕视觉效果、故事表达和人物塑造展开讨论。', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80', '电影动态', '系统初始化', 'ONLINE', 320, 1, NOW()),
-(2, '经典高分电影长评征集活动开启', '平台鼓励用户发布深度长评。', '为了鼓励优质内容创作，平台将根据点赞数、收藏数和回复数推荐优质长评。', 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1200&q=80', '平台活动', '系统初始化', 'ONLINE', 210, 1, NOW())
+(1, '暑期档科幻电影热度持续升温', '多部科幻电影带动观影讨论热潮。', '暑期档多部科幻题材影片受到关注，观众围绕视觉效果、故事表达和人物塑造展开讨论。', '/merch-shubiao.png', '电影动态', '系统初始化', 'ONLINE', 320, 1, NOW()),
+(2, '经典高分电影长评征集活动开启', '平台鼓励用户发布深度长评。', '为了鼓励优质内容创作，平台将根据点赞数、收藏数和回复数推荐优质长评。', '/merch-shubiao.png', '平台活动', '系统初始化', 'ONLINE', 210, 1, NOW())
 ON DUPLICATE KEY UPDATE title = VALUES(title), status = VALUES(status), updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO `movie`.`news_relations` (news_id, target_type, target_id, target_name)
@@ -354,11 +354,11 @@ ON DUPLICATE KEY UPDATE title = VALUES(title), status = VALUES(status), updated_
 INSERT INTO `movie`.`interpretation_videos` (
   id, movie_id, title, cover_url, platform, external_url, description, heat_score, click_count, status
 ) VALUES
-(1, 1, '《星际穿越》结局解析', 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80', '哔哩哔哩', 'https://www.bilibili.com', '从虫洞、五维空间和亲情线索解析电影结局。', 95, 0, 'ONLINE')
+(1, 1, '《星际穿越》结局解析', '/merch-shubiao.png', '哔哩哔哩', 'https://www.bilibili.com', '从虫洞、五维空间和亲情线索解析电影结局。', 95, 0, 'ONLINE')
 ON DUPLICATE KEY UPDATE title = VALUES(title), status = VALUES(status), updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO `movie`.`merchandise` (
   id, movie_id, name, image_url, product_type, price, description, platform, external_url, status
 ) VALUES
-(1, 1, '星际主题电影海报', 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1200&q=80', '海报', 39.90, '星际主题装饰海报，适合收藏和房间装饰。', '淘宝', 'https://www.taobao.com', 'ONLINE')
+(1, 1, '星际主题电影海报', '/merch-shubiao.png', '海报', 39.90, '星际主题装饰海报，适合收藏和房间装饰。', '淘宝', 'https://www.taobao.com', 'ONLINE')
 ON DUPLICATE KEY UPDATE name = VALUES(name), status = VALUES(status), updated_at = CURRENT_TIMESTAMP;

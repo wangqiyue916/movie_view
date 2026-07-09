@@ -1,4 +1,4 @@
-SET NAMES utf8mb4;
+﻿SET NAMES utf8mb4;
 SET time_zone = '+08:00';
 USE `movie`;
 
@@ -22,7 +22,7 @@ INSERT INTO `long_reviews` (
 
 《泰坦尼克号》常被记住为爱情片，但它真正经得起反复观看的原因，是爱情从来没有脱离阶层、身体和灾难处境。杰克与露丝的相遇并不是童话里“穷小子和贵族小姐”的简单互补，而是两个被不同制度塑形的人，在短暂航程中看见了另一种生活可能。
 
-![海面与船舱](https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=85)
+![海面与船舱](/merch-shubiao.png)
 
 ### 一、船舱结构就是社会结构
 
@@ -49,14 +49,14 @@ INSERT INTO `long_reviews` (
 因为影片没有把爱情写成逃避现实的避难所，而是把爱情写成一个人重新认识自己的触发点。灾难场面当然宏大，但最有余震的部分，是露丝最终活成了自己想象之外的人。她没有停留在失去杰克的那一夜，而是把那一夜变成往后每一次选择的起点。
 
 **《泰坦尼克号》的浪漫不只是“我爱你”，而是“我曾被你看见，所以我不能再把自己交还给旧生活”。**',
-'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=85','ONLINE',360,38,10,4,0,NULL,NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',360,38,10,4,0,NULL,NOW(),NOW()),
 
 (108,105,102,'《这个杀手不太冷》：温柔、危险和依恋的边界',
 '## 冷色城市里一段不稳定的相互拯救
 
 《这个杀手不太冷》之所以复杂，是因为它并不提供一种完全安全的亲密关系。里昂和玛蒂尔达彼此需要，彼此照亮，也彼此携带危险。影片动人的地方，恰恰在于它让观众同时感到温柔和不安。
 
-![城市窗边](https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=1200&q=85)
+![城市窗边](/merch-shubiao.png)
 
 ### 一、里昂为什么像一个被困住的孩子
 
@@ -83,14 +83,14 @@ INSERT INTO `long_reviews` (
 玛蒂尔达把盆栽种进土里，是全片最轻却最稳的一笔。它意味着漂浮的人终于需要根，也意味着里昂未能完成的正常生活，被她以另一种方式接住。这个动作没有消除悲伤，却让悲伤获得了方向。
 
 **这部电影最值得讨论的，不是它有多酷，而是它如何在酷的表面下藏着失根、创伤和对正常生活的笨拙渴望。**',
-'https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=1200&q=85','ONLINE',340,34,9,3,0,NULL,NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',340,34,9,3,0,NULL,NOW(),NOW()),
 
 (109,106,103,'《阿甘正传》：纯真不是迟钝，而是一种穿越时代的方式',
 '## 当历史变成背景，一个普通人如何保留善意
 
 《阿甘正传》很容易被误读成励志模板，但它真正耐看的地方并不在“傻人有傻福”，而在于阿甘以近乎直线的生命姿态穿过复杂时代。他不解释历史，不占有历史，却不断被历史卷入。
 
-![奔跑的道路](https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=1200&q=85)
+![奔跑的道路](/merch-shubiao.png)
 
 ### 一、奔跑不是成功学动作
 
@@ -117,14 +117,14 @@ INSERT INTO `long_reviews` (
 > 纯真不是拒绝成长，而是在成长之后仍然保留不计算他人的能力。
 
 **《阿甘正传》最动人的并不是传奇经历，而是一个普通人用有限理解守住了无限善意。**',
-'https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=1200&q=85','ONLINE',330,32,8,3,0,NULL,NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',330,32,8,3,0,NULL,NOW(),NOW()),
 
 (110,108,104,'《疯狂动物城》：糖衣喜剧里的偏见机器',
 '## 一座可爱城市如何生产不平等
 
 《疯狂动物城》表面明亮、节奏轻快，实际讨论的却是偏见如何被制度化。兔朱迪以为只要足够努力就能进入理想职业，狐尼克则早早学会用玩世不恭保护自己。两个人的相遇，是励志叙事和现实经验的一次碰撞。
 
-![城市与霓虹](https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1200&q=85)
+![城市与霓虹](/merch-shubiao.png)
 
 ### 一、朱迪的理想为什么会受挫
 
@@ -147,14 +147,14 @@ INSERT INTO `long_reviews` (
 因为它用类型片方式降低了议题门槛。孩子能看到冒险和笑点，成年观众能看到职场歧视、媒体煽动、身份标签和公共恐慌。这样的影片非常适合在详情页关联长评、资讯和解读视频，让不同理解层次的用户都能进入讨论。
 
 **《疯狂动物城》真正成熟的地方，是它承认善良的人也可能携带偏见，而改变必须从看见自己开始。**',
-'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1200&q=85','ONLINE',315,29,7,3,0,NULL,NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',315,29,7,3,0,NULL,NOW(),NOW()),
 
 (111,111,105,'《让子弹飞》：笑声里的权力结构',
 '## 荒诞不是逃离现实，而是现实的另一种精确表达
 
 《让子弹飞》的魅力不只是台词密集，也不只是人物够疯。它真正耐看的地方，是把权力关系、利益交换和民众心理写进一场看似荒唐的鹅城游戏。观众第一次看会笑，第二次看会听台词，第三次看往往开始注意谁在什么时候沉默。
 
-![旧城与光影](https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=85)
+![旧城与光影](/merch-shubiao.png)
 
 ### 一、张麻子为什么必须“站着把钱挣了”
 
@@ -179,14 +179,14 @@ INSERT INTO `long_reviews` (
 很多台词第一次听像笑话，回头看却是权力逻辑的压缩表达。影片的节奏很快，但信息密度极高，每一次误认、替身和公开表演，都在追问“合法性从哪里来”。这也是它适合长评区反复拆解的原因。
 
 **《让子弹飞》的高级之处，是让观众在笑声中进入政治寓言，又在寓言里看见现实生活中那些熟悉的犹豫和算计。**',
-'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=85','ONLINE',305,28,6,2,0,NULL,NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',305,28,6,2,0,NULL,NOW(),NOW()),
 
 (112,112,102,'《海上钢琴师》：不上岸的人，如何面对无限选择',
 '## 1900的恐惧不是陆地，而是没有边界的生活
 
 《海上钢琴师》经常被看作浪漫的艺术家寓言，但1900不上岸这件事并不只是孤高。对他来说，船是有限世界：有固定的房间、甲板、航线和观众。陆地则意味着无法穷尽的街道、名字、机会和失控。
 
-![钢琴与海](https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=85)
+![钢琴与海](/merch-shubiao.png)
 
 ### 一、有限为什么反而带来自由
 
@@ -210,15 +210,15 @@ INSERT INTO `long_reviews` (
 1900的选择令人心疼，因为它既有尊严，也有局限。影片没有简单赞美逃避，而是让我们感受到一个人如何在自己的天赋和恐惧之间建立秩序。不上岸不是胜利，也不是失败，它更像一个人忠于自身结构的结果。
 
 **《海上钢琴师》最终留下的问题是：如果世界太大，大到足以吞没一个人的名字，那么留在有限之处，是否也是一种自我保护？**',
-'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=85','ONLINE',300,27,6,2,0,NULL,NOW(),NOW());
+'/merch-shubiao.png','ONLINE',300,27,6,2,0,NULL,NOW(),NOW());
 
 INSERT INTO `review_images` (review_id, image_url, sort_order) VALUES
-(107,'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=85',1),
-(108,'https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=1200&q=85',1),
-(109,'https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=1200&q=85',1),
-(110,'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1200&q=85',1),
-(111,'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=85',1),
-(112,'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=85',1);
+(107,'/merch-shubiao.png',1),
+(108,'/merch-shubiao.png',1),
+(109,'/merch-shubiao.png',1),
+(110,'/merch-shubiao.png',1),
+(111,'/merch-shubiao.png',1),
+(112,'/merch-shubiao.png',1);
 
 UPDATE `news_articles`
 SET content = '近段时间，经典电影修复和重映再次成为影迷关注的话题。与简单的怀旧不同，修复版让许多作品以更接近原始创作意图的面貌回到银幕，也让年轻观众获得第一次在大银幕观看经典的机会。经典重映的意义并不只在于“再看一次”，而在于它把旧作品重新放回当下语境，让不同年龄层观众围绕同一部影片建立新的公共讨论。

@@ -1,4 +1,4 @@
-SET NAMES utf8mb4;
+﻿SET NAMES utf8mb4;
 SET time_zone = '+08:00';
 USE `movie`;
 
@@ -70,7 +70,7 @@ SELECT
 
 这篇补充长评用于丰富电影详情页内容，重点不是简单判断“好看”或“不好看”，而是把一次观影体验拆成几个可以继续交流的角度。对电影点评系统来说，一部电影如果只有评分和几句短评，用户很难真正停留；而当详情页里有结构完整的长评、图片和讨论入口时，电影就会从资料条目变成社区话题。
 
-![电影氛围图](', COALESCE(m.poster_url, 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=85'), ')
+![电影氛围图](', COALESCE(m.poster_url, '/merch-shubiao.png'), ')
 
 ### 一、基础观感：类型、节奏和人物
 
@@ -104,7 +104,7 @@ SELECT
 
 **总体来说，《', m.title, '》适合作为电影详情页的内容样本：它既能展示评分，也能承载短评、长评、资讯和视频之间的联动。**'
   ),
-  COALESCE(m.poster_url, 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=85'),
+  COALESCE(m.poster_url, '/merch-shubiao.png'),
   'ONLINE',
   180 + MOD(m.id, 80),
   18 + MOD(m.id, 20),
@@ -134,7 +134,7 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO `review_images` (review_id, image_url, sort_order)
 SELECT 20000 + m.id,
-       COALESCE(m.poster_url, 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=85'),
+       COALESCE(m.poster_url, '/merch-shubiao.png'),
        1
 FROM `movies` m
 WHERE m.status = 'ONLINE' AND m.deleted_at IS NULL

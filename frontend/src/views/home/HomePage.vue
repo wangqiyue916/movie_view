@@ -74,7 +74,7 @@
           :to="`/news/${news.id}`"
           class="news-card"
         >
-          <img :src="news.coverUrl || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'" :alt="news.title" />
+          <img :src="news.coverUrl || '/merch-shubiao.png'" :alt="news.title" />
           <div>
             <span>{{ news.category }}</span>
             <h3>{{ news.title }}</h3>
@@ -122,7 +122,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-const posterFallback = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'
+const posterFallback = '/merch-shubiao.png'
 const showcaseKickers = ['近期热门', '高分口碑', '正在热议', '编辑推荐']
 
 const activeIndex = ref(0)

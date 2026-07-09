@@ -24,15 +24,6 @@
           <el-option label="服饰" value="服饰" />
           <el-option label="其他" value="其他" />
         </el-select>
-        <el-select v-model="movieId" placeholder="关联电影" clearable @change="search">
-          <el-option label="全部" :value="0" />
-          <el-option label="星际穿越" :value="1" />
-          <el-option label="盗梦空间" :value="2" />
-          <el-option label="流浪地球2" :value="3" />
-          <el-option label="暗夜骑士" :value="4" />
-          <el-option label="蜘蛛侠" :value="5" />
-          <el-option label="钢铁侠" :value="6" />
-        </el-select>
         <el-select v-model="priceRange" placeholder="价格区间" clearable @change="search">
           <el-option label="全部" value="" />
           <el-option label="0-50" value="0-50" />
@@ -95,7 +86,6 @@ const pageSize = 12
 const total = ref(0)
 const keyword = ref('')
 const productType = ref('')
-const movieId = ref(0)
 const priceRange = ref('')
 
 async function fetchProducts() {
@@ -106,7 +96,6 @@ async function fetchProducts() {
       pageSize,
       keyword: keyword.value || undefined,
       productType: productType.value || undefined,
-      movieId: movieId.value || undefined,
       priceRange: priceRange.value || undefined,
     })
     products.value = res.list || []

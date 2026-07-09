@@ -1,5 +1,10 @@
 <template>
   <div class="movie-detail-page" v-loading="loading">
+    <div v-if="!movie && !loading" class="empty-state">
+      <el-empty description="电影不存在或已下架" />
+      <router-link to="/movies" class="back-link">← 返回电影列表</router-link>
+    </div>
+
     <!-- Hero -->
     <section v-if="movie" class="hero-section">
       <div class="hero-poster">
@@ -77,42 +82,9 @@
       <ShortCommentList :movie-id="movieId" :has-rated="Boolean(myCurrentRating)" />
     </section>
 
-    <!-- Long Reviews -->
-    <section class="section">
-      <SectionHeading title="长评" />
-      <PlaceholderPanel title="长评区域" description="发布长评前需要先完成电影评分，长评功能将由郭俊岑同学实现" />
-    </section>
-
-    <!-- Related News -->
-    <section class="section">
-      <SectionHeading title="相关资讯" />
-      <div v-if="newsLoading" class="section-loading">
-        <el-skeleton :rows="1" animated />
-      </div>
-      <div v-else-if="newsList.length === 0" class="section-empty">
-        <span>暂无相关资讯</span>
-      </div>
-      <div v-else class="news-mini-grid">
-        <article
-          v-for="news in newsList"
-          :key="news.id"
-          class="news-mini-card"
-          @click="goNewsDetail(news.id)"
-        >
-          <div class="news-mini-cover">
-            <img :src="news.coverUrl || defaultCover" :alt="news.title" />
-          </div>
-          <div class="news-mini-body">
-            <h4>{{ news.title }}</h4>
-            <p>{{ news.summary }}</p>
-          </div>
-        </article>
-      </div>
-    </section>
-
     <!-- Hot Interpretation Videos -->
-    <section class="section">
-      <SectionHeading title="解读视频" />
+    <section class="section video-section">
+      <h2 class="section-title">热门解读视频</h2>
       <div v-if="videosLoading" class="section-loading">
         <el-skeleton :rows="1" animated />
       </div>
@@ -139,8 +111,8 @@
     </section>
 
     <!-- Related Merchandise -->
-    <section class="section">
-      <SectionHeading title="周边商品" />
+    <section class="section merchandise-section">
+      <h2 class="section-title">相关周边</h2>
       <div v-if="merchandiseLoading" class="section-loading">
         <el-skeleton :rows="1" animated />
       </div>
@@ -167,6 +139,33 @@
         </div>
       </div>
     </section>
+
+    <!-- Related News -->
+    <section class="section news-section">
+      <h2 class="section-title">相关资讯</h2>
+      <div v-if="newsLoading" class="section-loading">
+        <el-skeleton :rows="1" animated />
+      </div>
+      <div v-else-if="newsList.length === 0" class="section-empty">
+        <span>暂无相关资讯</span>
+      </div>
+      <div v-else class="news-mini-grid">
+        <article
+          v-for="news in newsList"
+          :key="news.id"
+          class="news-mini-card"
+          @click="goNewsDetail(news.id)"
+        >
+          <div class="news-mini-cover">
+            <img :src="news.coverUrl || defaultCover" :alt="news.title" />
+          </div>
+          <div class="news-mini-body">
+            <h4>{{ news.title }}</h4>
+            <p>{{ news.summary }}</p>
+          </div>
+        </article>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -179,11 +178,9 @@ import { homeApi, type NewsArticle } from '@/api/homeApi'
 import { videoApi, type VideoItem } from '@/api/videoApi'
 import { merchandiseApi, type MerchandiseItem } from '@/api/merchandiseApi'
 import { ElMessage } from 'element-plus'
-import SectionHeading from '@/components/movie/SectionHeading.vue'
 import RatingDisplay from '@/components/movie/RatingDisplay.vue'
 import StarRating from '@/components/movie/StarRating.vue'
 import ShortCommentList from '@/components/comment/ShortCommentList.vue'
-import PlaceholderPanel from '@/components/common/PlaceholderPanel.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -194,6 +191,13 @@ const movie = ref<MovieDetail | null>(null)
 const loading = ref(false)
 const myCurrentRating = ref<MyRating | null>(null)
 
+const ratingForm = reactive({
+  totalScore: 0,
+  storyScore: 0,
+  visualScore: 0,
+  actingScore: 0,
+})
+
 const videos = ref<VideoItem[]>([])
 const videosLoading = ref(false)
 const merchandise = ref<MerchandiseItem[]>([])
@@ -202,13 +206,6 @@ const newsList = ref<NewsArticle[]>([])
 const newsLoading = ref(false)
 
 const defaultCover = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'
-
-const ratingForm = reactive({
-  totalScore: 0,
-  storyScore: 0,
-  visualScore: 0,
-  actingScore: 0,
-})
 
 async function fetchMovie() {
   loading.value = true
@@ -254,6 +251,25 @@ async function clearRating() {
   ratingForm.actingScore = 0
 }
 
+function handleVideoClick(video: VideoItem) {
+  if (video.externalUrl) {
+    window.open(video.externalUrl, '_blank')
+    videoApi.recordClick(video.id).catch(() => {})
+  }
+}
+
+function handleMerchandiseClick(item: MerchandiseItem) {
+  if (item.externalUrl) {
+    window.open(item.externalUrl, '_blank')
+  } else {
+    router.push(`/merchandise/${item.id}`)
+  }
+}
+
+function goNewsDetail(id: number) {
+  router.push(`/news/${id}`)
+}
+
 async function fetchVideos() {
   videosLoading.value = true
   try {
@@ -290,25 +306,6 @@ async function fetchNews() {
   }
 }
 
-function handleVideoClick(video: VideoItem) {
-  if (video.externalUrl) {
-    window.open(video.externalUrl, '_blank')
-    videoApi.recordClick(video.id).catch(() => {})
-  }
-}
-
-function handleMerchandiseClick(item: MerchandiseItem) {
-  if (item.externalUrl) {
-    window.open(item.externalUrl, '_blank')
-  } else {
-    router.push(`/merchandise/${item.id}`)
-  }
-}
-
-function goNewsDetail(id: number) {
-  router.push(`/news/${id}`)
-}
-
 onMounted(() => {
   fetchMovie()
   fetchMyRating()
@@ -329,6 +326,18 @@ onMounted(() => {
 
 :global(body) {
   background: #050505;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 120px 20px;
+}
+
+.empty-state .back-link {
+  display: inline-block;
+  margin-top: 16px;
+  color: #e8c16d;
+  font-size: 14px;
 }
 
 /* Hero */
@@ -424,13 +433,23 @@ onMounted(() => {
   min-width: 0;
 }
 
-/* Section */
+/* Sections */
 .section {
   position: relative;
   z-index: 1;
   max-width: 1360px;
   margin: 48px auto 0;
   padding: 0 32px;
+}
+
+.section-title {
+  margin: 0 0 20px;
+  font-family: "Noto Serif SC", "Songti SC", SimSun, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #e8c16d;
+  padding-left: 14px;
+  border-left: 3px solid #d6b05f;
 }
 
 .section-loading {
@@ -508,13 +527,6 @@ onMounted(() => {
   border: 1px solid rgb(214 176 95 / 16%);
 }
 
-.my-rating-title {
-  font-size: 15px;
-  color: #e8c16d;
-  margin: 0 0 14px;
-  font-weight: 600;
-}
-
 .my-rating-display {
   display: flex;
   align-items: center;
@@ -581,20 +593,6 @@ onMounted(() => {
   color: #e8c16d;
 }
 
-/* Dark placeholder overrides */
-:deep(.panel) {
-  background: linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 1%)) !important;
-  border: 1px solid rgb(214 176 95 / 14%) !important;
-}
-
-:deep(.page-title) {
-  color: #d8c69b !important;
-}
-
-:deep(.muted) {
-  color: #6b5e45 !important;
-}
-
 /* Video Scroll Row */
 .video-scroll-row {
   display: flex;
@@ -606,6 +604,7 @@ onMounted(() => {
 .video-scroll-row::-webkit-scrollbar {
   height: 4px;
 }
+
 .video-scroll-row::-webkit-scrollbar-thumb {
   background: rgb(214 176 95 / 30%);
   border-radius: 2px;
@@ -843,18 +842,6 @@ onMounted(() => {
   .rating-main {
     flex-direction: row;
     gap: 12px;
-  }
-
-  .video-scroll-row {
-    gap: 12px;
-  }
-
-  .merchandise-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .news-mini-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>
