@@ -2,22 +2,28 @@
   <div class="home-page">
     <!-- 轮播展示区 -->
     <section class="showcase" aria-label="热门展示">
+      <button class="showcase-arrow showcase-arrow-left" @click="prevSlide" :disabled="total <= 1">◂</button>
+
       <div class="showcase-frame">
         <article
           v-for="(item, index) in showcaseItems"
           :key="item.title"
           class="showcase-card"
           :class="getSlideClass(index)"
+          @click="item.id ? openMovie(item.id, item.title) : undefined"
         >
-          <img :src="item.image" :alt="item.title" />
+          <img :src="item.image" :alt="item.title" @error="(e) => { (e.target as HTMLImageElement).src = fallbackFor(item.title) }" />
           <div class="showcase-mask"></div>
           <div class="showcase-content">
-            <span>{{ item.kicker }}</span>
+            <span>电影推荐</span>
             <h1>{{ item.title }}</h1>
-            <p>{{ item.description }}</p>
+            <p v-if="item.score">{{ item.score }}</p>
           </div>
         </article>
       </div>
+
+      <button class="showcase-arrow showcase-arrow-right" @click="nextSlide" :disabled="total <= 1">▸</button>
+
       <div class="showcase-dots" aria-label="轮播分页">
         <button
           v-for="(_, index) in showcaseItems"
@@ -25,7 +31,7 @@
           type="button"
           :class="{ active: index === activeIndex }"
           :aria-label="`切换到第 ${index + 1} 张展示图`"
-          @click="activeIndex = index"
+          @click="goSlide(index)"
         ></button>
       </div>
     </section>
@@ -39,22 +45,24 @@
       <div class="movie-category-list">
         <section v-for="group in movieGroups" :key="group.title" class="movie-category">
           <h3>{{ group.title }}</h3>
-          <div class="poster-row">
-            <article
-              v-for="movie in group.movies"
-              :key="`${group.title}-${movie.title}`"
-              class="poster-card"
-              role="button"
-              tabindex="0"
-              @click="openMovie(movie.id, movie.title)"
-              @keyup.enter="openMovie(movie.id, movie.title)"
-            >
-              <div class="poster-frame">
-                <img :src="movie.poster" :alt="movie.title" />
-                <strong>{{ movie.score }}</strong>
-              </div>
-              <p>{{ movie.title }}</p>
-            </article>
+          <div class="poster-scroll-track" @mouseenter="pauseScroll" @mouseleave="resumeScroll">
+            <div class="poster-scroll-inner">
+              <article
+                v-for="(movie, mi) in [...group.movies, ...group.movies]"
+                :key="`${group.title}-${movie.id}-${mi}`"
+                class="poster-card"
+                role="button"
+                tabindex="0"
+                @click="openMovie(movie.id, movie.title)"
+                @keyup.enter="openMovie(movie.id, movie.title)"
+              >
+                <div class="poster-frame">
+                  <img :src="movie.poster" :alt="movie.title" />
+                  <strong>{{ movie.score }}</strong>
+                </div>
+                <p>{{ movie.title }}</p>
+              </article>
+            </div>
           </div>
         </section>
       </div>
@@ -74,7 +82,7 @@
           :to="`/news/${news.id}`"
           class="news-card"
         >
-          <img :src="news.coverUrl || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'" :alt="news.title" />
+          <img :src="validCoverUrl(news.coverUrl, news.id || news.title)" :alt="news.title" />
           <div>
             <span>{{ news.category }}</span>
             <h3>{{ news.title }}</h3>
@@ -117,19 +125,57 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { homeApi, type HomeData, type NewsArticle, type ReviewItem, type MovieItem } from '@/api/homeApi'
+import { homeApi, type HomeData, type NewsArticle, type ReviewItem, type MovieItem, type RecCard } from '@/api/homeApi'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
 const posterFallback = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'
-const showcaseKickers = ['近期热门', '高分口碑', '正在热议', '编辑推荐']
 
 const activeIndex = ref(0)
 let timer: number | undefined
+let scrollPaused = false
+const scrollAnimIds: number[] = []
 
-// API 数据
-const bannerNews = ref<NewsArticle[]>([])
+const prevSlide = () => {
+  if (total.value > 1) activeIndex.value = (activeIndex.value - 1 + total.value) % total.value
+}
+const nextSlide = () => {
+  if (total.value > 1) activeIndex.value = (activeIndex.value + 1) % total.value
+}
+const goSlide = (idx: number) => { activeIndex.value = idx }
+function pauseScroll() { scrollPaused = true }
+function resumeScroll() { scrollPaused = false }
+
+const FALLBACKS = [
+  'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1524985066-dd778a71c7b4?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=900&q=85',
+]
+function fallbackFor(key: number | string) {
+  let hash = 0
+  for (let i = 0; i < String(key).length; i++) hash = ((hash << 5) - hash) + String(key).charCodeAt(i)
+  return FALLBACKS[Math.abs(hash) % FALLBACKS.length]
+}
+
+function validCoverUrl(url: string, key: number | string): string {
+  if (!url || url.startsWith('/merch-') || url.startsWith('/')) return fallbackFor(key)
+  return url
+}
+
+function formatScore(score: string): string {
+  if (!score || score === '暂无') return '暂无'
+  const num = parseFloat(score)
+  if (isNaN(num)) return score
+  return (num / 2).toFixed(1)
+}
+
+const bannerRecs = ref<RecCard[]>([])
 const latestNews = ref<NewsArticle[]>([])
 const hotMovies = ref<MovieItem[]>([])
 const topRatedMovies = ref<MovieItem[]>([])
@@ -137,23 +183,23 @@ const latestMovies = ref<MovieItem[]>([])
 const featuredReviews = ref<ReviewItem[]>([])
 
 const showcaseItems = computed(() => {
-  if (hotMovies.value.length > 0) {
-    return hotMovies.value.slice(0, 4).map((movie, index) => ({
-      id: movie.id,
-      kicker: showcaseKickers[index] || '热门电影',
-      title: movie.title,
-      description: `数据库实时推荐影片，当前总评分 ${movie.score || '暂无'}。`,
-      image: movie.poster || posterFallback,
+  if (bannerRecs.value.length > 0) {
+    return bannerRecs.value.slice(0, 4).map((rec: RecCard) => ({
+      id: rec.id,
+      title: rec.title || '(无标题)',
+      score: '',
+      image: rec.image || fallbackFor(rec.id || rec.title),
     }))
   }
-
-  return bannerNews.value.slice(0, 4).map(news => ({
-    id: undefined,
-    kicker: news.category || '电影资讯',
-    title: news.title,
-    description: news.summary,
-    image: news.coverUrl || posterFallback,
-  }))
+  if (hotMovies.value.length > 0) {
+    return hotMovies.value.slice(0, 4).map((movie: MovieItem) => ({
+      id: movie.id,
+      title: movie.title,
+      score: formatScore(movie.score),
+      image: movie.poster || fallbackFor(movie.id || movie.title),
+    }))
+  }
+  return []
 })
 
 const total = computed(() => showcaseItems.value.length)
@@ -166,44 +212,73 @@ const getSlideClass = (index: number) => {
   return 'is-back'
 }
 
-// 组装电影分组
 const movieGroups = computed(() => [
   {
     title: '近期热门',
-    movies: hotMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster || posterFallback, score: m.score })),
+    movies: hotMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster || posterFallback, score: formatScore(m.score) })),
   },
   {
     title: '高分推荐',
-    movies: topRatedMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster || posterFallback, score: m.score })),
+    movies: topRatedMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster || posterFallback, score: formatScore(m.score) })),
   },
   {
     title: '最新上映',
-    movies: latestMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster || posterFallback, score: m.score })),
+    movies: latestMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster || posterFallback, score: formatScore(m.score) })),
   },
 ])
 
-// 首页固定展示的资讯数量（取前4条）
 const displayedNews = computed(() => latestNews.value.slice(0, 4))
 
-// 获取首页数据
 async function fetchHomeData() {
   try {
     const data: HomeData = await homeApi.getHomeData()
-    bannerNews.value = data.bannerNews || []
+    bannerRecs.value = data.bannerRecs || []
     latestNews.value = data.latestNews || []
     hotMovies.value = data.hotMovies || []
     topRatedMovies.value = data.topRatedMovies || []
     latestMovies.value = data.latestMovies || []
     featuredReviews.value = data.featuredReviews || []
   } catch {
-    // 接口失败时使用空数据，页面会优雅降级
+    // 降级
   }
+  startScrollAnimations()
+}
+
+function startScrollAnimations() {
+  stopScrollAnimations()
+  setTimeout(() => {
+    const tracks = document.querySelectorAll('.poster-scroll-inner')
+    let rowIndex = 0
+    tracks.forEach((track) => {
+      rowIndex++
+      const speed = 0.15 + (rowIndex % 3) * 0.15
+      const el = track as HTMLElement
+      if (!el || el.children.length < 2) return
+      const gapPx = 14
+      const singleW = el.children[0]?.getBoundingClientRect?.()?.width || 138
+      const halfN = el.children.length / 2
+      const totalW = (singleW + gapPx) * halfN
+      let offset = -(rowIndex * singleW * 0.7)
+      const animate = () => {
+        if (!scrollPaused) {
+          offset -= speed
+          if (offset <= -totalW) offset += totalW
+          el.style.transform = `translateX(${offset}px)`
+        }
+        scrollAnimIds.push(requestAnimationFrame(animate))
+      }
+      animate()
+    })
+  }, 300)
+}
+
+function stopScrollAnimations() {
+  scrollAnimIds.forEach(id => cancelAnimationFrame(id))
+  scrollAnimIds.length = 0
 }
 
 const openMovie = (id: number | undefined, _title: string) => {
-  if (id) {
-    router.push(`/movies/${id}`)
-  }
+  if (id) router.push(`/movies/${id}`)
 }
 
 const openReview = (review: ReviewItem) => {
@@ -217,16 +292,13 @@ const openReview = (review: ReviewItem) => {
 onMounted(() => {
   fetchHomeData()
   timer = window.setInterval(() => {
-    if (total.value > 0) {
-      activeIndex.value = (activeIndex.value + 1) % total.value
-    }
+    if (total.value > 0) activeIndex.value = (activeIndex.value + 1) % total.value
   }, 4000)
 })
 
 onBeforeUnmount(() => {
-  if (timer) {
-    window.clearInterval(timer)
-  }
+  if (timer) window.clearInterval(timer)
+  stopScrollAnimations()
 })
 </script>
 
@@ -396,10 +468,44 @@ onBeforeUnmount(() => {
 .showcase-content p {
   max-width: 620px;
   margin: 0;
-  color: #ead9b5;
-  font-size: 18px;
-  line-height: 1.7;
+  color: #f2b24b;
+  font-size: 24px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  text-shadow: 0 0 14px rgb(214 176 95 / 40%);
 }
+
+/* Showcase Arrows */
+.showcase-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgb(214 176 95 / 32%);
+  border-radius: 50%;
+  background: rgb(0 0 0 / 50%);
+  color: #e8c16d;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 200ms ease;
+  line-height: 1;
+  padding: 0;
+}
+
+.showcase-arrow:hover:not(:disabled) {
+  background: rgb(214 176 95 / 16%);
+  border-color: #d6b05f;
+  color: #f3d58c;
+}
+
+.showcase-arrow:disabled { opacity: 0.2; cursor: not-allowed; }
+.showcase-arrow-left { left: 8px; }
+.showcase-arrow-right { right: 8px; }
 
 .showcase-card.is-active {
   z-index: 4;
@@ -545,14 +651,51 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 
-.poster-row {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 138px;
+/* Poster Scroll (auto left-to-right) */
+.poster-scroll-track {
+  overflow: hidden;
+  position: relative;
+  margin-right: -60px;
+}
+
+.poster-scroll-inner {
+  display: flex;
   gap: 14px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scrollbar-color: rgb(214 176 95 / 45%) transparent;
+  will-change: transform;
+  padding-right: 60px;
+}
+
+.poster-scroll-inner > .poster-card {
+  flex: 0 0 138px;
+  min-width: 138px;
+  transition: filter 300ms ease, margin-top 400ms ease;
+}
+
+.poster-scroll-inner > .poster-card:nth-child(odd) {
+  margin-top: 12px;
+  filter: brightness(0.82);
+}
+
+.poster-scroll-inner > .poster-card:nth-child(even) {
+  margin-top: 0;
+}
+
+.poster-scroll-track:hover .poster-scroll-inner > .poster-card:hover {
+  margin-top: -4px !important;
+  filter: brightness(1.15);
+  z-index: 2;
+}
+
+.poster-scroll-track::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 60px;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(270deg, rgb(5 5 5 / 92%), transparent);
 }
 
 .poster-card {
