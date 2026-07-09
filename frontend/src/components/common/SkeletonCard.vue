@@ -1,3 +1,9 @@
+<!--
+  骨架屏卡片组件（潘玺名，2025-07-08）
+  用于页面数据加载期间的占位展示，避免白屏等待
+  金色 shimmer 动画与黑金主题一致
+  用法：<SkeletonCard width="100%" height="200px" />
+-->
 <template>
   <div class="skeleton-card" :style="{ width: width, height: height }">
     <div class="skeleton-pulse" />

@@ -31,6 +31,7 @@ const routes: RouteRecordRaw[] = [
       { path: '', name: 'AdminDashboardPage', component: () => import('@/views/admin/AdminDashboardPage.vue') },
       { path: 'certifications', name: 'CertificationAuditPage', component: () => import('@/views/admin/CertificationAuditPage.vue') },
       { path: 'audits', name: 'AuditListPage', component: () => import('@/views/admin/AuditListPage.vue') },
+      { path: 'homepage-recommendations', name: 'HomepageRecommendPage', component: () => import('@/views/admin/HomepageRecommendPage.vue') },
       { path: 'reports', name: 'ReportHandlePage', component: () => import('@/views/admin/ReportHandlePage.vue') },
     ],
   },

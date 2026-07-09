@@ -51,13 +51,18 @@
           <span>内容审核</span>
           <span class="link-arrow">→</span>
         </router-link>
+        <router-link to="/admin/homepage-recommendations" class="quick-link">
+          <span class="link-icon">🏠</span>
+          <span>首页推荐</span>
+          <span class="link-arrow">→</span>
+        </router-link>
         <router-link to="/admin/reports" class="quick-link">
           <span class="link-icon">🚩</span>
           <span>举报处理</span>
           <span class="link-arrow">→</span>
         </router-link>
         <router-link to="/" class="quick-link">
-          <span class="link-icon">🏠</span>
+          <span class="link-icon">↩️</span>
           <span>返回前台</span>
           <span class="link-arrow">→</span>
         </router-link>
