@@ -18,6 +18,10 @@
           <el-icon><Checked /></el-icon>
           <span>内容审核</span>
         </router-link>
+        <router-link to="/admin/homepage-recommendations">
+          <el-icon><HomeFilled /></el-icon>
+          <span>首页推荐</span>
+        </router-link>
         <router-link to="/admin/reports">
           <el-icon><WarningFilled /></el-icon>
           <span>举报处理</span>
@@ -45,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { DataAnalysis, Checked, WarningFilled, Back, Stamp, VideoCamera, Goods } from '@element-plus/icons-vue'
+import { DataAnalysis, Checked, WarningFilled, Back, Stamp, HomeFilled, VideoCamera, Goods } from '@element-plus/icons-vue'
 </script>
 
 <style scoped>
