@@ -29,12 +29,22 @@ if (-not $nodeOk) {
     Read-Host "Press Enter to exit"
     exit 1
 }
+
 if (-not $mvnOk) {
     Write-Host "[ERROR] Maven not found at: $MvnPath" -ForegroundColor Red
     Write-Host "Please install Maven or update MvnPath in this script." -ForegroundColor Red
     Read-Host "Press Enter to exit"
     exit 1
 }
+
+# ---- Configure database from environment, with local defaults ----
+Write-Host ">>> Configuring database connection..." -ForegroundColor Yellow
+if (-not $env:DB_HOST) { $env:DB_HOST = "localhost" }
+if (-not $env:DB_PORT) { $env:DB_PORT = "3306" }
+if (-not $env:DB_NAME) { $env:DB_NAME = "movie" }
+if (-not $env:DB_USERNAME) { $env:DB_USERNAME = "root" }
+if (-not $env:DB_PASSWORD) { $env:DB_PASSWORD = "" }
+Write-Host "    Database: $env:DB_HOST`:$env:DB_PORT/$env:DB_NAME" -ForegroundColor Green
 
 $nodeVer = & $nodeExe --version
 Write-Host "[OK] Node.js: $nodeVer" -ForegroundColor Green

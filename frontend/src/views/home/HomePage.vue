@@ -40,7 +40,15 @@
         <section v-for="group in movieGroups" :key="group.title" class="movie-category">
           <h3>{{ group.title }}</h3>
           <div class="poster-row">
-            <article v-for="movie in group.movies" :key="`${group.title}-${movie.title}`" class="poster-card">
+            <article
+              v-for="movie in group.movies"
+              :key="`${group.title}-${movie.title}`"
+              class="poster-card"
+              role="button"
+              tabindex="0"
+              @click="openMovie(movie.id, movie.title)"
+              @keyup.enter="openMovie(movie.id, movie.title)"
+            >
               <div class="poster-frame">
                 <img :src="movie.poster" :alt="movie.title" />
                 <strong>{{ movie.score }}</strong>
@@ -84,7 +92,15 @@
         <router-link to="/long-reviews" class="news-more-link">更多 ›</router-link>
       </div>
       <div class="review-list">
-        <article v-for="review in featuredReviews" :key="review.title" class="review-card">
+        <article
+          v-for="review in featuredReviews"
+          :key="review.id || review.title"
+          class="review-card"
+          role="button"
+          tabindex="0"
+          @click="openReview(review)"
+          @keyup.enter="openReview(review)"
+        >
           <h3>{{ review.title }}</h3>
           <p>{{ review.excerpt }}</p>
           <div class="review-meta">
@@ -102,44 +118,43 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { homeApi, type HomeData, type NewsArticle, type ReviewItem, type MovieItem } from '@/api/homeApi'
+import { useRouter } from 'vue-router'
 
-// 轮播数据
-const showcaseItems = ref([
-  {
-    kicker: '今日热映',
-    title: '星际穿越',
-    description: '在时间、宇宙与亲情之间，重看一场宏大的银幕冒险。',
-    image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1800&q=85',
-  },
-  {
-    kicker: '高分经典',
-    title: '盗梦空间',
-    description: '层层梦境与意识迷宫，把悬疑感推向极致。',
-    image: 'https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=1800&q=85',
-  },
-  {
-    kicker: '华语科幻',
-    title: '流浪地球2',
-    description: '灾难叙事、工业想象与群像人物交织成新的科幻样貌。',
-    image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1800&q=85',
-  },
-  {
-    kicker: '口碑长线',
-    title: '影院热议榜',
-    description: '跟随观众评分与长评热度，发现下一部值得看的电影。',
-    image: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1800&q=85',
-  },
-])
+const router = useRouter()
+
+const posterFallback = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'
+const showcaseKickers = ['近期热门', '高分口碑', '正在热议', '编辑推荐']
 
 const activeIndex = ref(0)
 let timer: number | undefined
 
 // API 数据
+const bannerNews = ref<NewsArticle[]>([])
 const latestNews = ref<NewsArticle[]>([])
 const hotMovies = ref<MovieItem[]>([])
 const topRatedMovies = ref<MovieItem[]>([])
 const latestMovies = ref<MovieItem[]>([])
 const featuredReviews = ref<ReviewItem[]>([])
+
+const showcaseItems = computed(() => {
+  if (hotMovies.value.length > 0) {
+    return hotMovies.value.slice(0, 4).map((movie, index) => ({
+      id: movie.id,
+      kicker: showcaseKickers[index] || '热门电影',
+      title: movie.title,
+      description: `数据库实时推荐影片，当前总评分 ${movie.score || '暂无'}。`,
+      image: movie.poster || posterFallback,
+    }))
+  }
+
+  return bannerNews.value.slice(0, 4).map(news => ({
+    id: undefined,
+    kicker: news.category || '电影资讯',
+    title: news.title,
+    description: news.summary,
+    image: news.coverUrl || posterFallback,
+  }))
+})
 
 const total = computed(() => showcaseItems.value.length)
 
@@ -155,15 +170,15 @@ const getSlideClass = (index: number) => {
 const movieGroups = computed(() => [
   {
     title: '近期热门',
-    movies: hotMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
+    movies: hotMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster || posterFallback, score: m.score })),
   },
   {
     title: '高分推荐',
-    movies: topRatedMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
+    movies: topRatedMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster || posterFallback, score: m.score })),
   },
   {
     title: '最新上映',
-    movies: latestMovies.value.map(m => ({ title: m.title, poster: m.poster, score: m.score })),
+    movies: latestMovies.value.map(m => ({ id: m.id, title: m.title, poster: m.poster || posterFallback, score: m.score })),
   },
 ])
 
@@ -174,6 +189,7 @@ const displayedNews = computed(() => latestNews.value.slice(0, 4))
 async function fetchHomeData() {
   try {
     const data: HomeData = await homeApi.getHomeData()
+    bannerNews.value = data.bannerNews || []
     latestNews.value = data.latestNews || []
     hotMovies.value = data.hotMovies || []
     topRatedMovies.value = data.topRatedMovies || []
@@ -184,10 +200,26 @@ async function fetchHomeData() {
   }
 }
 
+const openMovie = (id: number | undefined, _title: string) => {
+  if (id) {
+    router.push(`/movies/${id}`)
+  }
+}
+
+const openReview = (review: ReviewItem) => {
+  if (review.id) {
+    router.push(`/long-reviews/${review.id}`)
+    return
+  }
+  router.push('/long-reviews')
+}
+
 onMounted(() => {
   fetchHomeData()
   timer = window.setInterval(() => {
-    activeIndex.value = (activeIndex.value + 1) % total.value
+    if (total.value > 0) {
+      activeIndex.value = (activeIndex.value + 1) % total.value
+    }
   }, 4000)
 })
 
@@ -210,16 +242,7 @@ onBeforeUnmount(() => {
   min-height: calc(100vh - 64px);
   padding: 36px max(22px, calc((100vw - 1280px) / 2)) 72px;
   color: #f7edd5;
-  background:
-    radial-gradient(circle at 8% 18%, rgb(214 176 95 / 14%), transparent 24%),
-    radial-gradient(circle at 92% 26%, rgb(214 176 95 / 12%), transparent 24%),
-    radial-gradient(circle at 50% 100%, rgb(214 176 95 / 10%), transparent 34%),
-    radial-gradient(circle at 18% 34%, rgb(214 176 95 / 18%) 0 1px, transparent 2px),
-    radial-gradient(circle at 84% 42%, rgb(214 176 95 / 16%) 0 1px, transparent 2px),
-    radial-gradient(circle at 10% 72%, rgb(214 176 95 / 12%) 0 1px, transparent 2px),
-    radial-gradient(circle at 91% 78%, rgb(214 176 95 / 14%) 0 1px, transparent 2px),
-    linear-gradient(180deg, #050505 0%, #0e0c08 46%, #050505 100%),
-    repeating-linear-gradient(90deg, rgb(214 176 95 / 8%) 0 1px, transparent 1px 120px);
+  background: transparent;
 }
 
 .home-page::before,
@@ -534,6 +557,7 @@ onBeforeUnmount(() => {
 
 .poster-card {
   min-width: 0;
+  cursor: pointer;
 }
 
 .poster-frame {
@@ -665,6 +689,14 @@ onBeforeUnmount(() => {
 .review-card {
   min-height: 108px;
   padding: 13px 16px;
+  cursor: pointer;
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.review-card:hover {
+  border-color: rgb(214 176 95 / 48%);
+  box-shadow: 0 14px 34px rgb(0 0 0 / 44%);
+  transform: translateY(-1px);
 }
 
 .review-card p {

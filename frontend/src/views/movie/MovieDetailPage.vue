@@ -1,172 +1,199 @@
 <template>
-  <div class="page movie-detail-page">
-    <div v-if="loading" class="loading-state">
-      <el-skeleton :rows="10" animated />
-    </div>
-
-    <div v-else-if="!movie" class="empty-state">
-      <el-empty description="电影不存在或已下架" />
-      <router-link to="/movies" class="back-link">← 返回电影列表</router-link>
-    </div>
-
-    <template v-else>
-      <!-- Hero Section -->
-      <div class="hero-section">
-        <div class="hero-backdrop" :style="{ backgroundImage: `url(${movie.posterUrl})` }" />
-        <div class="hero-overlay" />
-        <div class="hero-content">
-          <div class="hero-poster">
-            <img :src="movie.posterUrl" :alt="movie.title" />
-          </div>
-          <div class="hero-info">
-            <h1 class="movie-title">{{ movie.title }}</h1>
-            <p v-if="movie.originalTitle" class="original-title">{{ movie.originalTitle }}</p>
-            <div class="movie-meta">
-              <span v-if="movie.genres" class="meta-tag">{{ movie.genres }}</span>
-              <span v-if="movie.releaseDate" class="meta-item">{{ movie.releaseDate }}</span>
-              <span v-if="movie.region" class="meta-item">{{ movie.region }}</span>
-              <span v-if="movie.durationMinutes" class="meta-item">{{ movie.durationMinutes }} 分钟</span>
-            </div>
-            <div v-if="movie.director" class="movie-crew">
-              <span class="label">导演：</span>{{ movie.director }}
-            </div>
-            <div v-if="movie.actors" class="movie-crew">
-              <span class="label">主演：</span>{{ movie.actors }}
-            </div>
-            <p v-if="movie.synopsis" class="synopsis">{{ movie.synopsis }}</p>
-            <div v-if="movie.avgTotalScore" class="rating-badge">
-              <span class="rating-score">{{ movie.avgTotalScore }}</span>
-              <span class="rating-stars">{{ renderStars(movie.avgTotalScore) }}</span>
-            </div>
-          </div>
+  <div class="movie-detail-page" v-loading="loading">
+    <!-- Hero -->
+    <section v-if="movie" class="hero-section">
+      <div class="hero-poster">
+        <img :src="movie.posterUrl || 'https://via.placeholder.com/400x560/1a1a1a/d6b05f?text=No+Poster'" :alt="movie.title" />
+      </div>
+      <div class="hero-info">
+        <h1 class="hero-title">{{ movie.title }}</h1>
+        <p v-if="movie.originalTitle" class="hero-original-title">{{ movie.originalTitle }}</p>
+        <div class="hero-meta">
+          <span v-if="movie.genres">{{ movie.genres }}</span>
+          <span v-if="movie.releaseDate">{{ movie.releaseDate }}</span>
+          <span v-if="movie.region">{{ movie.region }}</span>
+          <span v-if="movie.durationMinutes">{{ movie.durationMinutes }} 分钟</span>
         </div>
+        <p v-if="movie.director" class="hero-attr"><em>导演：</em>{{ movie.director }}</p>
+        <p v-if="movie.actors" class="hero-attr"><em>主演：</em>{{ movie.actors }}</p>
+        <p v-if="movie.synopsis" class="hero-synopsis">{{ movie.synopsis }}</p>
+        <p class="hero-views">{{ movie.viewCount }} 次浏览</p>
       </div>
 
-      <!-- Rating Scores -->
-      <div v-if="movie.avgTotalScore" class="section rating-section">
-        <h2 class="section-title">评分详情</h2>
-        <div class="score-cards">
-          <div class="score-card">
-            <span class="score-label">综合</span>
-            <span class="score-value">{{ movie.avgTotalScore }}</span>
-          </div>
-          <div v-if="movie.avgStoryScore" class="score-card">
-            <span class="score-label">剧情</span>
-            <span class="score-value">{{ movie.avgStoryScore }}</span>
-          </div>
-          <div v-if="movie.avgVisualScore" class="score-card">
-            <span class="score-label">视觉</span>
-            <span class="score-value">{{ movie.avgVisualScore }}</span>
-          </div>
-          <div v-if="movie.avgActingScore" class="score-card">
-            <span class="score-label">演技</span>
-            <span class="score-value">{{ movie.avgActingScore }}</span>
+      <aside class="hero-rating-column" aria-label="电影评分">
+        <div class="rating-panel">
+          <p class="side-panel-title">评分</p>
+          <div class="rating-content">
+            <div class="rating-main">
+              <span class="big-score">{{ movie.avgTotalScore ?? '—' }}</span>
+              <span class="big-score-label">总评分</span>
+              <span class="rating-count">{{ movie.ratingCount }} 人评分</span>
+            </div>
+            <div class="rating-subs">
+              <RatingDisplay :rating="movie.avgStoryScore" label="剧情" size="small" />
+              <RatingDisplay :rating="movie.avgVisualScore" label="特效" size="small" />
+              <RatingDisplay :rating="movie.avgActingScore" label="演技" size="small" />
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Hot Interpretation Videos -->
-      <div class="section video-section">
-        <h2 class="section-title">热门解读视频</h2>
-        <div v-if="videosLoading" class="section-loading">
-          <el-skeleton :rows="1" animated />
-        </div>
-        <div v-else-if="videos.length === 0" class="section-empty">
-          <span>暂无解读视频</span>
-        </div>
-        <div v-else class="video-scroll-row">
-          <div
-            v-for="video in videos"
-            :key="video.id"
-            class="video-card"
-            @click="handleVideoClick(video)"
-          >
-            <div class="video-cover">
-              <img :src="video.coverUrl || defaultCover" :alt="video.title" />
-              <span class="video-platform">{{ video.platform }}</span>
-            </div>
-            <div class="video-info">
-              <h4 class="video-title">{{ video.title }}</h4>
-              <span v-if="video.heatScore" class="video-heat">🔥 {{ video.heatScore }}</span>
-            </div>
+        <div v-if="userStore.isLogin" class="my-rating-panel">
+          <p class="side-panel-title">我的评分</p>
+          <div v-if="myCurrentRating" class="my-rating-display">
+            <span class="my-score">{{ myCurrentRating.totalScore }}</span>
+            <span class="my-score-sub">总评分</span>
+            <el-button size="small" class="clear-btn" @click="clearRating">清除重评</el-button>
           </div>
-        </div>
-      </div>
-
-      <!-- Related Merchandise -->
-      <div class="section merchandise-section">
-        <h2 class="section-title">相关周边</h2>
-        <div v-if="merchandiseLoading" class="section-loading">
-          <el-skeleton :rows="1" animated />
-        </div>
-        <div v-else-if="merchandise.length === 0" class="section-empty">
-          <span>暂无相关周边</span>
-        </div>
-        <div v-else class="merchandise-grid">
-          <div
-            v-for="item in merchandise"
-            :key="item.id"
-            class="merchandise-card"
-            @click="handleMerchandiseClick(item)"
-          >
-            <div class="merchandise-image">
-              <img :src="item.imageUrl" :alt="item.name" />
-            </div>
-            <div class="merchandise-info">
-              <h4 class="merchandise-name">{{ item.name }}</h4>
-              <div class="merchandise-meta">
-                <span class="merchandise-price">¥{{ item.price }}</span>
-                <span class="merchandise-platform">{{ item.platform }}</span>
+          <div v-else class="rating-form">
+            <div class="star-inputs">
+              <div class="star-row">
+                <label>总评分 <em>(必填)</em></label>
+                <StarRating v-model="ratingForm.totalScore" size="small" />
+              </div>
+              <div class="star-row">
+                <label>剧情</label>
+                <StarRating v-model="ratingForm.storyScore" size="small" />
+              </div>
+              <div class="star-row">
+                <label>特效</label>
+                <StarRating v-model="ratingForm.visualScore" size="small" />
+              </div>
+              <div class="star-row">
+                <label>演技</label>
+                <StarRating v-model="ratingForm.actingScore" size="small" />
               </div>
             </div>
+            <el-button class="submit-rating-btn" :disabled="!ratingForm.totalScore" @click="submitRating">提交评分</el-button>
+          </div>
+        </div>
+        <div v-else class="login-hint">
+          <el-link href="/login">登录</el-link> 后即可评分
+        </div>
+      </aside>
+    </section>
+
+    <!-- Short Comments -->
+    <section class="section">
+      <ShortCommentList :movie-id="movieId" :has-rated="Boolean(myCurrentRating)" />
+    </section>
+
+    <!-- Long Reviews -->
+    <section class="section">
+      <SectionHeading title="长评" />
+      <PlaceholderPanel title="长评区域" description="发布长评前需要先完成电影评分，长评功能将由郭俊岑同学实现" />
+    </section>
+
+    <!-- Related News -->
+    <section class="section">
+      <SectionHeading title="相关资讯" />
+      <div v-if="newsLoading" class="section-loading">
+        <el-skeleton :rows="1" animated />
+      </div>
+      <div v-else-if="newsList.length === 0" class="section-empty">
+        <span>暂无相关资讯</span>
+      </div>
+      <div v-else class="news-mini-grid">
+        <article
+          v-for="news in newsList"
+          :key="news.id"
+          class="news-mini-card"
+          @click="goNewsDetail(news.id)"
+        >
+          <div class="news-mini-cover">
+            <img :src="news.coverUrl || defaultCover" :alt="news.title" />
+          </div>
+          <div class="news-mini-body">
+            <h4>{{ news.title }}</h4>
+            <p>{{ news.summary }}</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Hot Interpretation Videos -->
+    <section class="section">
+      <SectionHeading title="解读视频" />
+      <div v-if="videosLoading" class="section-loading">
+        <el-skeleton :rows="1" animated />
+      </div>
+      <div v-else-if="videos.length === 0" class="section-empty">
+        <span>暂无解读视频</span>
+      </div>
+      <div v-else class="video-scroll-row">
+        <div
+          v-for="video in videos"
+          :key="video.id"
+          class="video-card"
+          @click="handleVideoClick(video)"
+        >
+          <div class="video-cover">
+            <img :src="video.coverUrl || defaultCover" :alt="video.title" />
+            <span class="video-platform">{{ video.platform }}</span>
+          </div>
+          <div class="video-info">
+            <h4 class="video-title">{{ video.title }}</h4>
+            <span v-if="video.heatScore" class="video-heat">🔥 {{ video.heatScore }}</span>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Related News -->
-      <div class="section news-section">
-        <h2 class="section-title">相关资讯</h2>
-        <div v-if="newsLoading" class="section-loading">
-          <el-skeleton :rows="1" animated />
-        </div>
-        <div v-else-if="newsList.length === 0" class="section-empty">
-          <span>暂无相关资讯</span>
-        </div>
-        <div v-else class="news-mini-grid">
-          <article
-            v-for="news in newsList"
-            :key="news.id"
-            class="news-mini-card"
-            @click="goNewsDetail(news.id)"
-          >
-            <div class="news-mini-cover">
-              <img :src="news.coverUrl || defaultCover" :alt="news.title" />
+    <!-- Related Merchandise -->
+    <section class="section">
+      <SectionHeading title="周边商品" />
+      <div v-if="merchandiseLoading" class="section-loading">
+        <el-skeleton :rows="1" animated />
+      </div>
+      <div v-else-if="merchandise.length === 0" class="section-empty">
+        <span>暂无相关周边</span>
+      </div>
+      <div v-else class="merchandise-grid">
+        <div
+          v-for="item in merchandise"
+          :key="item.id"
+          class="merchandise-card"
+          @click="handleMerchandiseClick(item)"
+        >
+          <div class="merchandise-image">
+            <img :src="item.imageUrl" :alt="item.name" />
+          </div>
+          <div class="merchandise-info">
+            <h4 class="merchandise-name">{{ item.name }}</h4>
+            <div class="merchandise-meta">
+              <span class="merchandise-price">¥{{ item.price }}</span>
+              <span class="merchandise-platform">{{ item.platform }}</span>
             </div>
-            <div class="news-mini-body">
-              <h4>{{ news.title }}</h4>
-              <p>{{ news.summary }}</p>
-            </div>
-          </article>
+          </div>
         </div>
       </div>
-    </template>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { movieApi } from '@/api/movieApi'
+import { useUserStore } from '@/stores/userStore'
+import { movieApi, type MovieDetail, type MyRating, type RatingSubmitRequest } from '@/api/movieApi'
 import { homeApi, type NewsArticle } from '@/api/homeApi'
 import { videoApi, type VideoItem } from '@/api/videoApi'
 import { merchandiseApi, type MerchandiseItem } from '@/api/merchandiseApi'
+import { ElMessage } from 'element-plus'
+import SectionHeading from '@/components/movie/SectionHeading.vue'
+import RatingDisplay from '@/components/movie/RatingDisplay.vue'
+import StarRating from '@/components/movie/StarRating.vue'
+import ShortCommentList from '@/components/comment/ShortCommentList.vue'
+import PlaceholderPanel from '@/components/common/PlaceholderPanel.vue'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
-const movie = ref<Record<string, unknown> | null>(null)
-const loading = ref(true)
+const movieId = computed(() => Number(route.params.id))
+const movie = ref<MovieDetail | null>(null)
+const loading = ref(false)
+const myCurrentRating = ref<MyRating | null>(null)
+
 const videos = ref<VideoItem[]>([])
 const videosLoading = ref(false)
 const merchandise = ref<MerchandiseItem[]>([])
@@ -176,27 +203,91 @@ const newsLoading = ref(false)
 
 const defaultCover = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'
 
-const mockMovie: Record<string, unknown> = {
-  id: 1,
-  title: '星际穿越',
-  originalTitle: 'Interstellar',
-  director: '克里斯托弗·诺兰',
-  actors: '马修·麦康纳, 安妮·海瑟薇',
-  genres: '科幻, 冒险',
-  releaseDate: '2014-11-12',
-  region: '美国',
-  durationMinutes: 169,
-  synopsis: '在不远的未来，地球面临着严重的环境恶化，人类生存岌岌可危。前NASA宇航员约瑟夫·库珀被选中参与一项穿越虫洞的星际旅行，为人类寻找新的家园。',
-  posterUrl: 'https://images.unsplash.com/photo-1534996858221-380b92700493?auto=format&fit=crop&w=1200&q=85',
-  avgTotalScore: 9.4,
-  avgStoryScore: 9.2,
-  avgVisualScore: 9.6,
-  avgActingScore: 9.3,
+const ratingForm = reactive({
+  totalScore: 0,
+  storyScore: 0,
+  visualScore: 0,
+  actingScore: 0,
+})
+
+async function fetchMovie() {
+  loading.value = true
+  try {
+    movie.value = await movieApi.getMovieDetail(movieId.value)
+  } finally {
+    loading.value = false
+  }
 }
 
-function renderStars(score: unknown): string {
-  const n = Math.round(Number(score) || 0)
-  return '★'.repeat(Math.min(n, 5)) + '☆'.repeat(Math.max(5 - n, 0))
+async function fetchMyRating() {
+  if (!userStore.isLogin) return
+  try {
+    myCurrentRating.value = await movieApi.getMyRating(movieId.value)
+  } catch {
+    myCurrentRating.value = null
+  }
+}
+
+async function submitRating() {
+  if (!ratingForm.totalScore) {
+    ElMessage.warning('请填写总评分')
+    return
+  }
+  try {
+    const data: RatingSubmitRequest = { totalScore: ratingForm.totalScore }
+    if (ratingForm.storyScore) data.storyScore = ratingForm.storyScore
+    if (ratingForm.visualScore) data.visualScore = ratingForm.visualScore
+    if (ratingForm.actingScore) data.actingScore = ratingForm.actingScore
+    await movieApi.submitRating(movieId.value, data)
+    ElMessage.success('评分成功')
+    await Promise.all([fetchMovie(), fetchMyRating()])
+  } catch {
+    ElMessage.error('评分失败')
+  }
+}
+
+async function clearRating() {
+  myCurrentRating.value = null
+  ratingForm.totalScore = 0
+  ratingForm.storyScore = 0
+  ratingForm.visualScore = 0
+  ratingForm.actingScore = 0
+}
+
+async function fetchVideos() {
+  videosLoading.value = true
+  try {
+    const res = await videoApi.getByMovie(String(movieId.value))
+    videos.value = Array.isArray(res) ? res : []
+  } catch {
+    videos.value = []
+  } finally {
+    videosLoading.value = false
+  }
+}
+
+async function fetchMerchandise() {
+  merchandiseLoading.value = true
+  try {
+    const res = await merchandiseApi.getByMovie(String(movieId.value))
+    merchandise.value = Array.isArray(res) ? res : []
+  } catch {
+    merchandise.value = []
+  } finally {
+    merchandiseLoading.value = false
+  }
+}
+
+async function fetchNews() {
+  newsLoading.value = true
+  try {
+    const res = await homeApi.getNewsList({ movieId: movieId.value, pageSize: 4 })
+    newsList.value = res.list || []
+  } catch {
+    newsList.value = []
+  } finally {
+    newsLoading.value = false
+  }
 }
 
 function handleVideoClick(video: VideoItem) {
@@ -218,63 +309,9 @@ function goNewsDetail(id: number) {
   router.push(`/news/${id}`)
 }
 
-async function fetchMovie() {
-  const movieId = route.params.id as string
-  try {
-    const res = await movieApi.getMovieDetail(movieId)
-    if (res && Object.keys(res).length > 0) {
-      movie.value = res
-    } else {
-      movie.value = mockMovie
-    }
-  } catch {
-    movie.value = mockMovie
-  }
-}
-
-async function fetchVideos() {
-  videosLoading.value = true
-  const movieId = route.params.id as string
-  try {
-    const res = await videoApi.getByMovie(movieId)
-    videos.value = Array.isArray(res) ? res : []
-  } catch {
-    videos.value = []
-  } finally {
-    videosLoading.value = false
-  }
-}
-
-async function fetchMerchandise() {
-  merchandiseLoading.value = true
-  const movieId = route.params.id as string
-  try {
-    const res = await merchandiseApi.getByMovie(movieId)
-    merchandise.value = Array.isArray(res) ? res : []
-  } catch {
-    merchandise.value = []
-  } finally {
-    merchandiseLoading.value = false
-  }
-}
-
-async function fetchNews() {
-  newsLoading.value = true
-  const movieId = route.params.id as string
-  try {
-    const res = await homeApi.getNewsList({ movieId: Number(movieId), pageSize: 4 })
-    newsList.value = res.list || []
-  } catch {
-    newsList.value = []
-  } finally {
-    newsLoading.value = false
-  }
-}
-
-onMounted(async () => {
-  loading.value = true
-  await fetchMovie()
-  loading.value = false
+onMounted(() => {
+  fetchMovie()
+  fetchMyRating()
   fetchVideos()
   fetchMerchandise()
   fetchNews()
@@ -283,55 +320,28 @@ onMounted(async () => {
 
 <style scoped>
 .movie-detail-page {
-  min-height: calc(100vh - 64px);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  position: relative;
   color: #f7edd5;
+  background: transparent;
+}
+
+:global(body) {
   background: #050505;
-  padding-bottom: 72px;
 }
 
-.loading-state,
-.empty-state {
-  text-align: center;
-  padding: 120px 20px;
-}
-
-.empty-state .back-link {
-  display: inline-block;
-  margin-top: 16px;
-  color: #e8c16d;
-  font-size: 14px;
-}
-
-/* Hero Section */
+/* Hero */
 .hero-section {
   position: relative;
-  min-height: 480px;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-
-.hero-backdrop {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  filter: blur(20px) brightness(0.3);
-  transform: scale(1.1);
-}
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgb(0 0 0 / 60%) 0%, rgb(0 0 0 / 90%) 100%);
-}
-
-.hero-content {
-  position: relative;
-  display: flex;
-  gap: 40px;
-  padding: 60px max(22px, calc((100vw - 1280px) / 2));
-  align-items: flex-start;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) minmax(320px, 380px);
+  gap: 34px;
+  align-items: start;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 54px 32px 0;
 }
 
 .hero-poster {
@@ -339,109 +349,88 @@ onMounted(async () => {
   width: 260px;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid rgb(214 176 95 / 30%);
-  box-shadow: 0 8px 40px rgb(0 0 0 / 50%);
+  border: 1px solid rgb(214 176 95 / 24%);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 50%);
 }
 
 .hero-poster img {
   width: 100%;
+  height: auto;
   display: block;
 }
 
 .hero-info {
-  flex: 1;
-  padding-top: 8px;
+  min-width: 0;
+  padding-top: 4px;
 }
 
-.movie-title {
-  margin: 0 0 8px;
-  font-family: "Noto Serif SC", "Songti SC", SimSun, serif;
-  font-size: 36px;
-  font-weight: 800;
+.hero-title {
+  font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif;
+  font-size: clamp(26px, 3.5vw, 42px);
   color: #fff8e6;
-  text-shadow: 0 0 20px rgb(214 176 95 / 25%);
+  margin: 0 0 6px;
+  line-height: 1.2;
 }
 
-.original-title {
-  margin: 0 0 16px;
-  color: #9a8b6e;
-  font-size: 16px;
-  font-style: italic;
+.hero-original-title {
+  font-size: 15px;
+  color: #b9ab90;
+  margin: 0 0 14px;
 }
 
-.movie-meta {
+.hero-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
-.meta-tag {
-  padding: 3px 12px;
-  border-radius: 999px;
-  background: rgb(214 176 95 / 20%);
-  color: #e8c16d;
-  font-size: 13px;
-}
-
-.meta-item {
-  color: #b9ab90;
-  font-size: 14px;
-}
-
-.movie-crew {
-  color: #c6b78f;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.movie-crew .label {
-  color: #8a7b60;
-}
-
-.synopsis {
-  margin: 20px 0;
+.hero-meta span {
+  padding: 3px 10px;
+  font-size: 12px;
   color: #d8c69b;
-  font-size: 15px;
+  background: rgb(214 176 95 / 10%);
+  border: 1px solid rgb(214 176 95 / 20%);
+  border-radius: 4px;
+}
+
+.hero-attr {
+  font-size: 14px;
+  color: #d8c69b;
+  margin: 0 0 6px;
+}
+
+.hero-attr em {
+  font-style: normal;
+  color: #b9ab90;
+}
+
+.hero-synopsis {
+  font-size: 14px;
+  color: #b9ab90;
   line-height: 1.8;
-  max-width: 700px;
+  margin: 16px 0 0;
 }
 
-.rating-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  border: 1px solid rgb(214 176 95 / 36%);
-  border-radius: 8px;
-  background: rgb(214 176 95 / 8%);
+.hero-views {
+  font-size: 12px;
+  color: #6b5e45;
+  margin: 12px 0 0;
 }
 
-.rating-score {
-  font-size: 28px;
-  font-weight: 700;
-  color: #e8c16d;
+.hero-rating-column {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
 }
 
-.rating-stars {
-  font-size: 18px;
-  color: #d6b05f;
-  letter-spacing: 2px;
-}
-
-/* Sections */
+/* Section */
 .section {
-  padding: 40px max(22px, calc((100vw - 1280px) / 2)) 0;
-}
-
-.section-title {
-  margin: 0 0 20px;
-  font-family: "Noto Serif SC", "Songti SC", SimSun, serif;
-  font-size: 22px;
-  font-weight: 700;
-  color: #e8c16d;
-  padding-left: 14px;
-  border-left: 3px solid #d6b05f;
+  position: relative;
+  z-index: 1;
+  max-width: 1360px;
+  margin: 48px auto 0;
+  padding: 0 32px;
 }
 
 .section-loading {
@@ -455,33 +444,155 @@ onMounted(async () => {
   font-size: 14px;
 }
 
-/* Rating Section */
-.score-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+/* Rating Panel */
+.rating-panel,
+.my-rating-panel,
+.login-hint {
+  padding: 24px 28px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 6%), rgb(255 255 255 / 2%));
+  border: 1px solid rgb(214 176 95 / 20%);
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 26%);
+}
+
+.side-panel-title {
+  margin: 0 0 18px;
+  color: #e8c16d;
+  font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.rating-content {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
+.rating-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.big-score {
+  font-family: Georgia, 'Noto Serif SC', serif;
+  font-size: 52px;
+  font-weight: 700;
+  color: #e8c16d;
+  line-height: 1;
+}
+
+.big-score-label {
+  font-size: 13px;
+  color: #b9ab90;
+}
+
+.rating-count {
+  font-size: 12px;
+  color: #6b5e45;
+}
+
+.rating-subs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* My Rating */
+.my-rating-panel {
+  background: linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 1%));
+  border: 1px solid rgb(214 176 95 / 16%);
+}
+
+.my-rating-title {
+  font-size: 15px;
+  color: #e8c16d;
+  margin: 0 0 14px;
+  font-weight: 600;
+}
+
+.my-rating-display {
+  display: flex;
+  align-items: center;
   gap: 16px;
 }
 
-.score-card {
-  text-align: center;
-  padding: 20px 16px;
-  border: 1px solid rgb(214 176 95 / 22%);
-  border-radius: 8px;
-  background: rgb(255 255 255 / 4%);
-}
-
-.score-label {
-  display: block;
-  color: #8a7b60;
-  font-size: 13px;
-  margin-bottom: 8px;
-}
-
-.score-value {
-  display: block;
+.my-score {
+  font-family: Georgia, serif;
   font-size: 28px;
-  font-weight: 700;
   color: #e8c16d;
+  font-weight: 700;
+}
+
+.my-score-sub {
+  font-size: 13px;
+  color: #b9ab90;
+}
+
+.clear-btn {
+  background: transparent;
+  border: 1px solid rgb(214 176 95 / 30%);
+  color: #cbb98f;
+}
+
+.star-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.star-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.star-row label {
+  width: 60px;
+  font-size: 13px;
+  color: #cbb98f;
+  flex-shrink: 0;
+}
+
+.star-row label em {
+  font-style: normal;
+  color: #e8c16d;
+  font-size: 11px;
+}
+
+.submit-rating-btn {
+  margin-top: 14px;
+  background: linear-gradient(135deg, #c9a035, #d6b05f);
+  color: #050505;
+  font-weight: 700;
+  border: none;
+}
+
+.login-hint {
+  font-size: 14px;
+  color: #b9ab90;
+}
+
+.login-hint a {
+  color: #e8c16d;
+}
+
+/* Dark placeholder overrides */
+:deep(.panel) {
+  background: linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 1%)) !important;
+  border: 1px solid rgb(214 176 95 / 14%) !important;
+}
+
+:deep(.page-title) {
+  color: #d8c69b !important;
+}
+
+:deep(.muted) {
+  color: #6b5e45 !important;
 }
 
 /* Video Scroll Row */
@@ -495,7 +606,6 @@ onMounted(async () => {
 .video-scroll-row::-webkit-scrollbar {
   height: 4px;
 }
-
 .video-scroll-row::-webkit-scrollbar-thumb {
   background: rgb(214 176 95 / 30%);
   border-radius: 2px;
@@ -690,29 +800,61 @@ onMounted(async () => {
   overflow: hidden;
 }
 
+@media (max-width: 1180px) {
+  .hero-section {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .hero-rating-column {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
-  .hero-content {
-    flex-direction: column;
+  .hero-section {
+    grid-template-columns: 1fr;
     align-items: center;
-    text-align: center;
-    padding-top: 40px;
+    padding: 36px 20px 0;
   }
 
   .hero-poster {
     width: 200px;
   }
 
-  .movie-meta {
-    justify-content: center;
+  .hero-info,
+  .hero-rating-column {
+    width: 100%;
   }
 
-  .movie-title {
-    font-size: 26px;
+  .hero-rating-column {
+    grid-template-columns: 1fr;
   }
 
   .section {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding: 0 20px;
+  }
+
+  .rating-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rating-main {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .video-scroll-row {
+    gap: 12px;
+  }
+
+  .merchandise-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .news-mini-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

@@ -97,6 +97,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading, Check, Close } from '@element-plus/icons-vue'
+import request from '@/api/request'
 
 const statusTabs = [
   { value: 'PENDING', label: '待处理' },
@@ -132,32 +133,44 @@ function formatDate(dateStr: string): string {
 
 async function fetchList() {
   loading.value = true
-  // 使用模拟数据
-  reports.value = [
-    { id: 1, targetType: 'SHORT_COMMENT', content: '这部电影太难看了...', reporterName: '用户A', reason: '恶意辱骂', status: 'PENDING', createdAt: new Date().toISOString() },
-    { id: 2, targetType: 'LONG_REVIEW', content: '关于某某电影的深度分析...', reporterName: '用户B', reason: '包含侵权内容', status: 'PENDING', createdAt: new Date().toISOString() },
-  ]
-  total.value = 2
-  pendingCount.value = 2
-  loading.value = false
+  try {
+    const res: any = await request.get('/admin/reports', {
+      params: { status: activeStatus.value, page: page.value, pageSize: pageSize }
+    })
+    reports.value = res.list || []
+    total.value = res.total || 0
+    pendingCount.value = res.pendingCount || 0
+  } catch {
+    reports.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 async function handleResolve(item: any) {
   try {
     await ElMessageBox.confirm('确定标记此举报为已处理？', '确认', { type: 'success' })
   } catch { return }
-  item.status = 'RESOLVED'
-  ElMessage.success('举报已处理')
-  fetchList()
+  try {
+    await request.post(`/admin/reports/${item.id}/resolve`)
+    ElMessage.success('举报已处理')
+    fetchList()
+  } catch {
+    ElMessage.error('操作失败')
+  }
 }
 
 async function handleDismiss(item: any) {
   try {
     await ElMessageBox.confirm('确定驳回此举报？', '确认', { type: 'warning' })
   } catch { return }
-  item.status = 'REJECTED'
-  ElMessage.success('举报已驳回')
-  fetchList()
+  try {
+    await request.post(`/admin/reports/${item.id}/reject`)
+    ElMessage.success('举报已驳回')
+    fetchList()
+  } catch {
+    ElMessage.error('操作失败')
+  }
 }
 
 onMounted(fetchList)

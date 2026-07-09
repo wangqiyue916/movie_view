@@ -19,7 +19,7 @@ INSERT IGNORE INTO movies (id, title, director, actors, synopsis, poster_url, st
 
 -- 3. 插入测试长评
 INSERT INTO long_reviews (id, movie_id, user_id, title, content_md, cover_url, status, view_count, like_count, favorite_count, reply_count, is_featured) VALUES
-(1, 1, 2, '《星际穿越》——时间与爱的维度', 
+(1, 1, 2, '《星际穿越》——时间与爱的维度',
 '## 写在前面\n\n《星际穿越》是诺兰最具野心的作品之一。\n\n## 剧情分析\n\n影片讲述了地球面临生态危机，前NASA飞行员库珀踏上星际旅程的故事。\n\n### 时间的相对性\n\n影片中**时间膨胀**的概念令人深思。在米勒星球上的一小时，相当于地球上的七年——这不仅是一个物理概念，更是对人类情感的终极考验。\n\n> \"我们曾经仰望星空，思索我们在宇宙中的位置。而现在我们只是低头，担心我们在泥土中的位置。\"\n\n## 视听语言\n\n汉斯·季默的配乐堪称经典，管风琴的宏大音色与太空的浩瀚完美契合。\n\n![剧照](https://example.com/interstellar.jpg)\n\n## 总结\n\n这是一部超越科幻类型的作品，它探讨的核心是**爱与时间**这两个永恒的主题。',
 'https://example.com/review_cover1.jpg', 'ONLINE', 1520, 89, 45, 12, 1),
 

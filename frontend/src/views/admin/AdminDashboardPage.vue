@@ -84,6 +84,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import request from '@/api/request'
 
 interface Stats {
   pendingAudits: number
@@ -102,41 +103,27 @@ const stats = ref<Stats>({
 const recentAudits = ref<any[]>([])
 
 async function fetchStats() {
-  const apiBase = import.meta.env.VITE_API_BASE_URL || '/api'
-  const token = localStorage.getItem('token') || ''
-  const headers = { Authorization: `Bearer ${token}` }
-
   try {
-    // 待审核内容（长评 + 资讯）
-    const [longReviewRes, newsRes] = await Promise.all([
-      fetch(`${apiBase}/admin/audits?targetType=LONG_REVIEW&status=PENDING&pageSize=1`, { headers }).then(r => r.json()),
-      fetch(`${apiBase}/admin/audits?targetType=NEWS&status=PENDING&pageSize=1`, { headers }).then(r => r.json()),
-      // 统计已上线内容
-      fetch(`${apiBase}/admin/audits?targetType=LONG_REVIEW&status=ONLINE&pageSize=1`, { headers }).then(r => r.json()),
-      fetch(`${apiBase}/admin/audits?targetType=NEWS&status=ONLINE&pageSize=1`, { headers }).then(r => r.json()),
-      // 待审核认证
-      fetch(`${apiBase}/admin/certifications?status=PENDING&pageSize=1`, { headers }).then(r => r.json()),
-    ])
-    stats.value.pendingAudits = (longReviewRes.data?.total || 0) + (newsRes.data?.total || 0)
-    stats.value.onlineContent = (longReviewRes.data?.total || 0) + (newsRes.data?.total || 0)
-    stats.value.pendingCerts = 0 // handled separately
+    const res: any = await request.get('/admin/dashboard')
+    stats.value.pendingAudits = res.pendingAudits || 0
+    stats.value.pendingCerts = res.pendingCerts || 0
+    stats.value.pendingReports = res.pendingReports || 0
+    stats.value.onlineContent = res.onlineContent || 0
+    recentAudits.value = (res.recentAudits || []).map((a: any) => ({
+      ...a,
+      type: typeLabel(a.type),
+      title: a.reason || a.type || '-',
+    }))
   } catch {
-    // 降级使用模拟数据
-    stats.value = { pendingAudits: 0, pendingCerts: 0, pendingReports: 0, onlineContent: 3 }
+    stats.value = { pendingAudits: 0, pendingCerts: 0, pendingReports: 0, onlineContent: 0 }
   }
+}
 
-  // 获取认证待审核数
-  try {
-    const certRes = await fetch(`${apiBase}/admin/certifications?status=PENDING&pageSize=1`, { headers }).then(r => r.json())
-    stats.value.pendingCerts = certRes.data?.total || 0
-  } catch { /* ignore */ }
-
-  // 模拟审核记录
-  recentAudits.value = [
-    { id: 1, type: '长评', title: '穿越星际之后，仍然回到人的情感', action: 'approve', actionLabel: '已通过', time: '10 分钟前' },
-    { id: 2, type: '资讯', title: '暑期档科幻电影热度持续升温', action: 'online', actionLabel: '已上线', time: '1 小时前' },
-    { id: 3, type: '认证', title: '某某电影公司', action: 'reject', actionLabel: '已驳回', time: '2 小时前' },
-  ]
+function typeLabel(t: string) {
+  const m: Record<string, string> = {
+    LONG_REVIEW: '长评', SHORT_COMMENT: '短评', NEWS: '资讯', MOVIE: '电影', MERCHANDISE: '周边', OFFICIAL_CERTIFICATION: '认证',
+  }
+  return m[t] || t
 }
 
 onMounted(fetchStats)

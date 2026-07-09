@@ -1,7 +1,13 @@
 package com.example.movie.news.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.movie.common.response.ApiResponse;
+import com.example.movie.longreview.entity.LongReview;
+import com.example.movie.longreview.mapper.LongReviewMapper;
+import com.example.movie.longreview.vo.FeaturedReviewVO;
+import com.example.movie.movie.entity.MovieEntity;
+import com.example.movie.movie.mapper.MovieMapper;
 import com.example.movie.news.entity.HomepageRecommendation;
 import com.example.movie.news.mapper.HomepageRecommendationMapper;
 import com.example.movie.news.service.NewsService;
@@ -22,10 +28,17 @@ public class HomeController {
 
     private final NewsService newsService;
     private final HomepageRecommendationMapper recommendationMapper;
+    private final LongReviewMapper longReviewMapper;
+    private final MovieMapper movieMapper;
 
-    public HomeController(NewsService newsService, HomepageRecommendationMapper recommendationMapper) {
+    public HomeController(NewsService newsService,
+                          HomepageRecommendationMapper recommendationMapper,
+                          LongReviewMapper longReviewMapper,
+                          MovieMapper movieMapper) {
         this.newsService = newsService;
         this.recommendationMapper = recommendationMapper;
+        this.longReviewMapper = longReviewMapper;
+        this.movieMapper = movieMapper;
     }
 
     /**
@@ -47,7 +60,7 @@ public class HomeController {
 
     /**
      * GET /api/home
-     * 首页聚合数据：轮播资讯 + 最新资讯 + Mock（热门电影/高分电影/优质长评/推荐周边）
+     * 首页聚合数据：轮播资讯 + 最新资讯 + 数据库电影 + 优质长评 + 推荐周边
      */
     @GetMapping
     public ApiResponse<Map<String, Object>> homeData() {
@@ -61,17 +74,15 @@ public class HomeController {
         List<com.example.movie.news.entity.NewsArticle> latestNews = newsService.getLatestNews(8);
         data.put("latestNews", latestNews.isEmpty() ? buildMockNews(8) : latestNews);
 
-        // TODO: 对接王琪越 - 热门电影 Mock
-        data.put("hotMovies", buildMockHotMovies());
+        data.put("hotMovies", buildHotMovies());
 
-        // TODO: 对接王琪越 - 高分电影 Mock
-        data.put("topRatedMovies", buildMockTopRatedMovies());
+        data.put("topRatedMovies", buildTopRatedMovies());
 
-        // TODO: 对接王琪越 - 最新电影 Mock
-        data.put("latestMovies", buildMockLatestMovies());
+        data.put("latestMovies", buildLatestMovies());
 
-        // TODO: 对接郭俊岑 - 优质长评 Mock
-        data.put("featuredReviews", buildMockFeaturedReviews());
+        // 优质长评：优先使用长评模块真实精选数据，无数据时降级 Mock
+        List<Map<String, Object>> featuredReviews = buildFeaturedReviews();
+        data.put("featuredReviews", featuredReviews.isEmpty() ? buildMockFeaturedReviews() : featuredReviews);
 
         // TODO: 对接周秋宏 - 推荐周边 Mock
         data.put("recommendedMerchandise", buildMockMerchandise());
@@ -79,40 +90,47 @@ public class HomeController {
         return ApiResponse.success(data);
     }
 
-    private List<Map<String, Object>> buildMockHotMovies() {
-        List<Map<String, Object>> list = new ArrayList<>();
-        list.add(movieItem(1L, "星际穿越", "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=500&q=85", "9.4"));
-        list.add(movieItem(2L, "盗梦空间", "https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=500&q=85", "9.3"));
-        list.add(movieItem(3L, "流浪地球2", "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=85", "8.3"));
-        list.add(movieItem(4L, "暗夜骑士", "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=500&q=85", "9.0"));
-        list.add(movieItem(5L, "星海回响", "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=500&q=85", "8.4"));
-        list.add(movieItem(6L, "梦境边缘", "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=500&q=85", "8.6"));
-        return list;
+    private List<Map<String, Object>> buildHotMovies() {
+        return movieMapper.selectList(
+                        new LambdaQueryWrapper<MovieEntity>()
+                                .eq(MovieEntity::getStatus, "ONLINE")
+                                .orderByDesc(MovieEntity::getViewCount)
+                                .orderByDesc(MovieEntity::getRatingCount)
+                                .last("LIMIT 8")
+                ).stream()
+                .map(this::movieItem)
+                .toList();
     }
 
-    private List<Map<String, Object>> buildMockTopRatedMovies() {
-        List<Map<String, Object>> list = new ArrayList<>();
-        list.add(movieItem(1L, "星际穿越", "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=500&q=85", "9.4"));
-        list.add(movieItem(2L, "盗梦空间", "https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=500&q=85", "9.3"));
-        list.add(movieItem(7L, "光影岁月", "https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=500&q=85", "9.2"));
-        list.add(movieItem(4L, "暗夜骑士", "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=500&q=85", "9.0"));
-        list.add(movieItem(8L, "午夜剧场", "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=500&q=85", "7.9"));
-        return list;
+    private List<Map<String, Object>> buildTopRatedMovies() {
+        return movieMapper.selectList(
+                        new LambdaQueryWrapper<MovieEntity>()
+                                .eq(MovieEntity::getStatus, "ONLINE")
+                                .isNotNull(MovieEntity::getAvgTotalScore)
+                                .orderByDesc(MovieEntity::getAvgTotalScore)
+                                .orderByDesc(MovieEntity::getRatingCount)
+                                .last("LIMIT 8")
+                ).stream()
+                .map(this::movieItem)
+                .toList();
     }
 
-    private List<Map<String, Object>> buildMockLatestMovies() {
-        List<Map<String, Object>> list = new ArrayList<>();
-        list.add(movieItem(5L, "星海回响", "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=500&q=85", "8.4"));
-        list.add(movieItem(9L, "银幕之夜", "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=85", "8.1"));
-        list.add(movieItem(6L, "梦境边缘", "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=500&q=85", "8.6"));
-        list.add(movieItem(10L, "北境列车", "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=500&q=85", "7.3"));
-        list.add(movieItem(11L, "蓝色荒原", "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=500&q=85", "7.5"));
-        return list;
+    private List<Map<String, Object>> buildLatestMovies() {
+        return movieMapper.selectList(
+                        new LambdaQueryWrapper<MovieEntity>()
+                                .eq(MovieEntity::getStatus, "ONLINE")
+                                .orderByDesc(MovieEntity::getReleaseDate)
+                                .orderByDesc(MovieEntity::getCreatedAt)
+                                .last("LIMIT 8")
+                ).stream()
+                .map(this::movieItem)
+                .toList();
     }
 
     private List<Map<String, Object>> buildMockFeaturedReviews() {
         List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> r1 = new LinkedHashMap<>();
+        r1.put("id", 1L);
         r1.put("title", "穿越星际之后，仍然回到人的情感");
         r1.put("excerpt", "它最动人的地方，是把宏大的宇宙尺度和具体的人之间重新连接起来。");
         r1.put("author", "影评人 Mori");
@@ -122,6 +140,7 @@ public class HomeController {
         list.add(r1);
 
         Map<String, Object> r2 = new LinkedHashMap<>();
+        r2.put("id", 2L);
         r2.put("title", "梦境不是谜题，而是欲望的回声");
         r2.put("excerpt", "真正让人反复回看的，并不只是结构，还有每一层梦境背后未被说破的执念。");
         r2.put("author", "用户 北辰");
@@ -131,6 +150,7 @@ public class HomeController {
         list.add(r2);
 
         Map<String, Object> r3 = new LinkedHashMap<>();
+        r3.put("id", 3L);
         r3.put("title", "灾难片里的群像，为什么仍然能打动人");
         r3.put("excerpt", "当宏大工程、末日危机和个体选择并置时，电影真正要讨论的不是奇观本身。");
         r3.put("author", "用户 山止川行");
@@ -142,6 +162,23 @@ public class HomeController {
         return list;
     }
 
+    private List<Map<String, Object>> buildFeaturedReviews() {
+        Page<FeaturedReviewVO> page = longReviewMapper.selectFeaturedReviews(new Page<LongReview>(1, 3));
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (FeaturedReviewVO review : page.getRecords()) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("id", review.getId());
+            item.put("title", review.getTitle());
+            item.put("excerpt", review.getSummary());
+            item.put("author", review.getAuthorNickname());
+            item.put("date", review.getCreatedAt() == null ? null : review.getCreatedAt().toLocalDate().toString());
+            item.put("likes", review.getLikeCount());
+            item.put("comments", review.getReplyCount());
+            list.add(item);
+        }
+        return list;
+    }
+
     private List<Map<String, Object>> buildMockMerchandise() {
         List<Map<String, Object>> list = new ArrayList<>();
         list.add(merchItem(1L, "星际穿越主题海报", "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=500&q=85", "￥39.9"));
@@ -150,12 +187,12 @@ public class HomeController {
         return list;
     }
 
-    private Map<String, Object> movieItem(Long id, String title, String poster, String score) {
+    private Map<String, Object> movieItem(MovieEntity movie) {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("id", id);
-        map.put("title", title);
-        map.put("poster", poster);
-        map.put("score", score);
+        map.put("id", movie.getId());
+        map.put("title", movie.getTitle());
+        map.put("poster", movie.getPosterUrl());
+        map.put("score", movie.getAvgTotalScore() == null ? "暂无" : movie.getAvgTotalScore().toPlainString());
         return map;
     }
 

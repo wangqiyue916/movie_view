@@ -280,13 +280,14 @@ marked.use({
   gfm: true,
   breaks: true,
   renderer: {
-    code({ text, lang }: { text: string; lang?: string }): string {
+    code(code: string, infostring?: string): string {
+      const lang = infostring?.match(/\S*/)?.[0]
       const language = lang && hljs.getLanguage(lang) ? lang : null
       let highlighted: string
       if (language) {
-        highlighted = hljs.highlight(text, { language }).value
+        highlighted = hljs.highlight(code, { language }).value
       } else {
-        highlighted = hljs.highlightAuto(text).value
+        highlighted = hljs.highlightAuto(code).value
       }
       const langAttr = language ? ` class="language-${language}"` : ''
       return `<pre><code${langAttr}>${highlighted}</code></pre>\n`

@@ -11,9 +11,14 @@ import java.sql.Statement;
 public class DataInitializer {
 
     public static void main(String[] args) throws Exception {
-        String url = "jdbc:mysql://dpshmy-nsoibg00vy6m3nxv-pub.proxy.dms.aliyuncs.com:3306/movie?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true";
-        String user = "uQ0sgL2iNbfkEirFiDrsqOZo";
-        String password = "P71JlvldMkny8yqZ3DUOt0msOqB7JC";
+        String host = System.getenv().getOrDefault("DB_HOST", "localhost");
+        String port = System.getenv().getOrDefault("DB_PORT", "3306");
+        String database = System.getenv().getOrDefault("DB_NAME", "movie");
+        String user = System.getenv().getOrDefault("DB_USERNAME", "root");
+        String password = System.getenv().getOrDefault("DB_PASSWORD", "");
+        String url = "jdbc:mysql://" + host + ":" + port + "/" + database
+                + "?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+                + "&useSSL=false&allowPublicKeyRetrieval=true";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
              Statement stmt = conn.createStatement()) {

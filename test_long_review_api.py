@@ -18,20 +18,20 @@ WARN_COUNT = 0
 def test(name, method, path, body=None, token=None, expected_status=200):
     """Execute a single API test"""
     global PASS_COUNT, FAIL_COUNT, WARN_COUNT
-    
+
     url = f"{BASE_URL}{path}"
     headers = {"Content-Type": "application/json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    
+
     data = json.dumps(body).encode() if body else None
-    
+
     try:
         req = urllib.request.Request(url, data=data, headers=headers, method=method)
         resp = urllib.request.urlopen(req)
         result = json.loads(resp.read().decode())
         code = result.get("code", -1)
-        
+
         if code == 0:
             print(f"  [PASS] {name}")
             print(f"         Response: {json.dumps(result, ensure_ascii=False)[:300]}")
@@ -59,7 +59,7 @@ def test(name, method, path, body=None, token=None, expected_status=200):
 
 def main():
     global PASS_COUNT, FAIL_COUNT, WARN_COUNT
-    
+
     print("=" * 60)
     print("  Long Review & Audit Module API Test")
     print("=" * 60)

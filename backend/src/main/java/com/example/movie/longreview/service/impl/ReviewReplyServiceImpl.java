@@ -29,14 +29,14 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     public PageResult<ReviewReplyVO> getReplies(Long reviewId, Long currentUserId, int page, int pageSize) {
         Page<ReviewReply> mpPage = new Page<>(page, pageSize);
         Page<ReviewReplyVO> resultPage = reviewReplyMapper.selectReplyPage(mpPage, reviewId, currentUserId);
-        
+
         resultPage.getRecords().forEach(vo -> {
             if (vo.getParentId() == null) {
                 List<ReviewReplyVO> children = reviewReplyMapper.selectChildReplies(vo.getId(), currentUserId);
                 vo.setChildren(children != null ? children : List.of());
             }
         });
-        
+
         return new PageResult<>(
                 resultPage.getRecords(),
                 (int) resultPage.getCurrent(),
@@ -52,7 +52,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
         if (review == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "长评不存在");
         }
-        
+
         ReviewReply reply = new ReviewReply();
         reply.setReviewId(reviewId);
         reply.setUserId(userId);
@@ -62,10 +62,10 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
         reply.setLikeCount(0);
         reply.setReportCount(0);
         reviewReplyMapper.insert(reply);
-        
+
         review.setReplyCount(review.getReplyCount() + 1);
         longReviewMapper.updateById(review);
-        
+
         return reply.getId();
     }
 

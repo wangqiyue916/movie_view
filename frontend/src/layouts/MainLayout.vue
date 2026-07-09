@@ -1,16 +1,16 @@
 <template>
-  <div class="main-layout" :class="{ 'home-layout': isHomePage }">
+  <div class="main-layout" :class="{ 'home-layout': isBlackGoldLayout }">
     <header class="main-header">
       <router-link class="brand" to="/">电影点评系统</router-link>
       <nav class="nav">
         <router-link to="/movies">电影</router-link>
-        <a href="/news" @click="handleNewsClick">资讯</a>
-        <a href="/long-reviews" @click="handleReviewsClick">长评</a>
+        <router-link to="/news">资讯</router-link>
+        <router-link to="/long-reviews">长评</router-link>
         <router-link to="/favorites" v-if="userStore.isLogin">收藏</router-link>
         <router-link to="/merchandise">周边</router-link>
       </nav>
       <div class="actions">
-        <UserDropdown :dark="isHomePage" />
+        <UserDropdown :dark="isBlackGoldLayout" />
       </div>
     </header>
     <main class="main-content">
@@ -32,29 +32,18 @@ import AiChatPanel from '@/components/ai/AiChatPanel.vue'
 const route = useRoute()
 const userStore = useUserStore()
 
-const isHomePage = computed(() => route.name === 'HomePage')
-
-function handleNewsClick(e: Event) {
-  if (isHomePage.value) {
-    e.preventDefault()
-    const target = document.getElementById('news-section')
-    if (target) {
-      const top = target.getBoundingClientRect().top + window.scrollY - 80
-      window.scrollTo({ top, behavior: 'smooth' })
-    }
-  }
-}
-
-function handleReviewsClick(e: Event) {
-  if (isHomePage.value) {
-    e.preventDefault()
-    const target = document.getElementById('reviews-section')
-    if (target) {
-      const top = target.getBoundingClientRect().top + window.scrollY - 80
-      window.scrollTo({ top, behavior: 'smooth' })
-    }
-  }
-}
+const blackGoldRoutes = [
+  'HomePage',
+  'MovieListPage',
+  'MovieDetailPage',
+  'NewsListPage',
+  'NewsDetailPage',
+  'LongReviewListPage',
+  'LongReviewDetailPage',
+  'LongReviewCreatePage',
+  'MerchandiseListPage',
+]
+const isBlackGoldLayout = computed(() => blackGoldRoutes.includes(route.name as string))
 </script>
 
 <style scoped>

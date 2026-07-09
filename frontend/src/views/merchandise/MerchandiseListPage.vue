@@ -86,7 +86,6 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import { merchandiseApi, type MerchandiseItem } from '@/api/merchandiseApi'
 
 const products = ref<MerchandiseItem[]>([])
