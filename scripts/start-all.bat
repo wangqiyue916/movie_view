@@ -16,13 +16,15 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":8080" ^| findstr "LISTENING
 )
 echo   8080 端口已就绪
 
-:: 2. 设置数据库环境变量
+:: 2. 加载数据库环境变量
 echo [2/3] 配置数据库连接...
-if "%DB_HOST%"=="" set DB_HOST=localhost
-if "%DB_PORT%"=="" set DB_PORT=3306
-if "%DB_NAME%"=="" set DB_NAME=movie
-if "%DB_USERNAME%"=="" set DB_USERNAME=root
-if "%DB_PASSWORD%"=="" set DB_PASSWORD=
+set PROJECT_DIR=%~dp0..
+if exist "%PROJECT_DIR%\movie-server\.env" (
+    for /f "usebackq tokens=1,2 delims==" %%a in ("%PROJECT_DIR%\movie-server\.env") do (
+        set %%a=%%b
+    )
+    echo   已加载 movie-server\.env
+)
 
 :: 3. 启动后端
 echo [3/3] 启动后端和前端...
@@ -30,9 +32,9 @@ echo.
 echo   后端: http://localhost:8080
 echo   前端: http://localhost:5173
 
-start "后端-SpringBoot" cmd /c "cd /d %~dp0backend && mvn spring-boot:run"
+start "后端-SpringBoot" cmd /c "cd /d %~dp0..\movie-server && mvn spring-boot:run"
 timeout /t 2 /nobreak >nul
-start "前端-Vite" cmd /c "cd /d %~dp0frontend && npm run dev"
+start "前端-Vite" cmd /c "cd /d %~dp0..\movie-web && npm run dev"
 
 timeout /t 8 /nobreak >nul
 start http://localhost:5173

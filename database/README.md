@@ -70,9 +70,9 @@ CREATE TABLE IF NOT EXISTS `movie`.`users` (...);
 ## 命令示例
 
 ```bash
-mysql -h dpshmy-ugp2kxl2hqqylbtj-pub.proxy.dms.aliyuncs.com -P 3306 -u nhH6IpERCnuCcjhV6h0okozZ -p movie < sql/schema.sql
-mysql -h dpshmy-ugp2kxl2hqqylbtj-pub.proxy.dms.aliyuncs.com -P 3306 -u nhH6IpERCnuCcjhV6h0okozZ -p movie < sql/init-data.sql
-mysql -h dpshmy-ugp2kxl2hqqylbtj-pub.proxy.dms.aliyuncs.com -P 3306 -u nhH6IpERCnuCcjhV6h0okozZ -p movie < sql/init-homepage-data.sql
+mysql -h dpshmy-ugp2kxl2hqqylbtj-pub.proxy.dms.aliyuncs.com -P 3306 -u nhH6IpERCnuCcjhV6h0okozZ -p movie < database/schema.sql
+mysql -h dpshmy-ugp2kxl2hqqylbtj-pub.proxy.dms.aliyuncs.com -P 3306 -u nhH6IpERCnuCcjhV6h0okozZ -p movie < database/init-data.sql
+mysql -h dpshmy-ugp2kxl2hqqylbtj-pub.proxy.dms.aliyuncs.com -P 3306 -u nhH6IpERCnuCcjhV6h0okozZ -p movie < database/init-homepage-data.sql
 ```
 
 数据库密码请在命令提示后输入，不要写入脚本或仓库。

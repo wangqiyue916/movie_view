@@ -1,4 +1,5 @@
-Set-Location "C:/Users/panso/Desktop/movie/movie_view"
+$projectDir = Split-Path -Parent $PSScriptRoot
+Set-Location $projectDir
 $out = @()
 $out += "=== BRANCH ==="
 $out += (git branch --show-current 2>&1)
@@ -22,5 +23,5 @@ $out += ""
 $out += "=== DIFF STAT ==="
 $out += (git diff --stat HEAD 2>&1)
 
-$out | Out-File -FilePath "C:/Users/panso/Desktop/movie/movie_view/git_status.txt" -Encoding UTF8
+$out | Out-File -FilePath (Join-Path $projectDir "git_status.txt") -Encoding UTF8
 Write-Host "DONE"

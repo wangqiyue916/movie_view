@@ -10,10 +10,10 @@
 
 ```text
 movie-review-system
-  ├── frontend
-  ├── backend
+  ├── movie-web
+  ├── movie-server
   ├── docs
-  ├── sql
+  ├── database
   └── README.md
 ```
 
@@ -201,12 +201,12 @@ main 分支只保留稳定版本。
 
 ## 11. 数据库脚本协作
 
-数据库变更必须写入 `sql` 目录。
+数据库变更必须写入 `database` 目录。
 
 建议结构：
 
 ```text
-sql
+database
   ├── schema.sql
   ├── init-data.sql
   └── update

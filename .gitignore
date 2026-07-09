@@ -1,14 +1,14 @@
 # Backend
-backend/target/
+movie-server/target/
 *.class
 
 # Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
-frontend/*.tsbuildinfo
-frontend/vite.config.js
-frontend/vite.config.d.ts
+movie-web/node_modules/
+movie-web/dist/
+movie-web/.vite/
+movie-web/*.tsbuildinfo
+movie-web/vite.config.js
+movie-web/vite.config.d.ts
 
 # Local configuration and logs
 .env

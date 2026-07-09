@@ -2,9 +2,9 @@
 
 本项目采用前后端分离架构：
 
-- `backend`：Spring Boot 后端基础框架。
-- `frontend`：Vue 3 + Vite 前端基础框架。
-- `sql`：数据库建表和初始化脚本。
+- `movie-server`：Spring Boot 后端基础框架。
+- `movie-web`：Vue 3 + Vite 前端基础框架。
+- `database`：数据库建表和初始化脚本。
 - `docs`：需求、设计、规范和上手文档。
 
 ## 快速启动
@@ -12,7 +12,7 @@
 ### 后端
 
 ```bash
-cd backend
+cd movie-server
 mvn spring-boot:run
 ```
 
@@ -31,7 +31,7 @@ GET http://localhost:8080/api/health
 ### 前端
 
 ```bash
-cd frontend
+cd movie-web
 npm install
 npm run dev
 ```
@@ -44,12 +44,12 @@ http://localhost:5173
 
 ## 数据库
 
-数据库脚本位于 `sql` 目录。
+数据库脚本位于 `database` 目录。
 
 执行顺序：
 
-1. `sql/schema.sql`
-2. `sql/init-data.sql`
+1. `database/schema.sql`
+2. `database/init-data.sql`
 
 数据库密码请通过环境变量 `DB_PASSWORD` 配置，不要写入代码或文档。
 

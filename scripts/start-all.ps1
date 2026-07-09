@@ -11,8 +11,8 @@ Write-Host ""
 # ---- Configure paths ----
 $NodePath = "C:\Program Files\nodejs"
 $MvnPath  = "C:\ProgramData\apache-maven-3.9.9\bin"
-$BackendDir  = Join-Path $PSScriptRoot "backend"
-$FrontendDir = Join-Path $PSScriptRoot "frontend"
+$BackendDir  = Join-Path $PSScriptRoot "..\movie-server"
+$FrontendDir = Join-Path $PSScriptRoot "..\movie-web"
 
 # ---- Fix PATH for this session ----
 $env:Path = "$NodePath;$MvnPath;" + $env:Path
