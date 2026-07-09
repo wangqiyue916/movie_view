@@ -35,6 +35,11 @@ public class VideoController {
         return ApiResponse.success(videos);
     }
 
+    @GetMapping("/movie/{movieId}")
+    public ApiResponse<List<InterpretationVideo>> listByMovie(@PathVariable Long movieId) {
+        return list(movieId);
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<InterpretationVideo> detail(@PathVariable Long id) {
         InterpretationVideo video = videoService.getVideoById(id);

@@ -42,7 +42,7 @@
       >
         <div class="news-card-cover">
           <img
-            :src="filterCover(news.coverUrl, news.id ?? news.title)"
+            :src="news.coverUrl || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85'"
             :alt="news.title"
           />
           <span v-if="news.category" class="news-category-tag">{{ news.category }}</span>
@@ -121,26 +121,6 @@ function goDetail(id: number) {
 function formatDate(dateStr: string) {
   if (!dateStr) return ''
   return dateStr.substring(0, 10)
-}
-
-const FALLBACKS = [
-  'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1524985066-dd778a71c7b4?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=900&q=85',
-]
-
-function filterCover(url: string, key: number | string): string {
-  if (!url || url.startsWith('/merch-') || url.startsWith('/')) {
-    let hash = 0
-    for (let i = 0; i < String(key).length; i++) hash = ((hash << 5) - hash) + String(key).charCodeAt(i)
-    return FALLBACKS[Math.abs(hash) % FALLBACKS.length]
-  }
-  return url
 }
 
 onMounted(() => {

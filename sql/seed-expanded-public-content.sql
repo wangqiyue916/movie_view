@@ -1,4 +1,4 @@
-SET NAMES utf8mb4;
+﻿SET NAMES utf8mb4;
 SET time_zone = '+08:00';
 USE `movie`;
 
@@ -36,18 +36,18 @@ INSERT INTO `movies` (
   duration_minutes, synopsis, poster_url, status, view_count, rating_count,
   avg_total_score, avg_story_score, avg_visual_score, avg_acting_score
 ) VALUES
-(101, '肖申克的救赎', 'The Shawshank Redemption', '弗兰克·德拉邦特', '蒂姆·罗宾斯, 摩根·弗里曼, 鲍勃·冈顿', '剧情, 犯罪', '1994-09-10', '美国', '英语', 142, '银行家安迪蒙冤入狱，在漫长岁月中以理性、友谊和希望对抗制度化的牢笼。', 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=700&q=85', 'ONLINE', 4820, 5, 9.6, 9.7, 8.7, 9.5),
-(102, '霸王别姬', 'Farewell My Concubine', '陈凯歌', '张国荣, 张丰毅, 巩俐', '剧情, 爱情, 历史', '1993-01-01', '中国大陆, 中国香港', '汉语普通话', 171, '两位京剧演员的命运与时代洪流交错，戏里戏外都写满身份、情感与历史创伤。', 'https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=700&q=85', 'ONLINE', 4632, 5, 9.5, 9.8, 9.1, 9.7),
-(103, '泰坦尼克号', 'Titanic', '詹姆斯·卡梅隆', '莱昂纳多·迪卡普里奥, 凯特·温斯莱特', '剧情, 爱情, 灾难', '1997-12-19', '美国', '英语', 194, '一段跨越阶层的爱情在巨轮沉没的历史时刻中绽放，浪漫与灾难互为镜像。', 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=85', 'ONLINE', 4388, 5, 9.4, 9.2, 9.5, 9.3),
-(104, '千与千寻', 'Spirited Away', '宫崎骏', '柊瑠美, 入野自由, 夏木真理', '动画, 奇幻, 冒险', '2001-07-20', '日本', '日语', 125, '少女千寻误入神灵世界，在劳动、勇气与记忆中完成自我成长。', 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=700&q=85', 'ONLINE', 4211, 5, 9.3, 9.3, 9.6, 8.9),
-(105, '这个杀手不太冷', 'Léon', '吕克·贝松', '让·雷诺, 娜塔莉·波特曼, 加里·奥德曼', '剧情, 动作, 犯罪', '1994-09-14', '法国, 美国', '英语', 110, '孤独杀手与失去家人的少女意外相遇，冷硬城市里生长出脆弱而危险的依恋。', 'https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=700&q=85', 'ONLINE', 3981, 5, 9.2, 9.0, 8.8, 9.4),
-(106, '阿甘正传', 'Forrest Gump', '罗伯特·泽米吉斯', '汤姆·汉克斯, 罗宾·怀特, 加里·西尼斯', '剧情, 爱情', '1994-07-06', '美国', '英语', 142, '阿甘以朴素、执着和善意穿过美国数十年历史，也让普通人的生命显出童话般的光。', 'https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=700&q=85', 'ONLINE', 3762, 5, 9.2, 9.1, 8.7, 9.4),
-(107, '楚门的世界', 'The Truman Show', '彼得·威尔', '金·凯瑞, 劳拉·琳妮, 艾德·哈里斯', '剧情, 科幻', '1998-06-05', '美国', '英语', 103, '楚门生活在一场巨大的真人秀中，当真实的边界被撕开，他必须选择是否走向未知。', 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=700&q=85', 'ONLINE', 3520, 5, 9.1, 9.3, 8.5, 9.0),
-(108, '疯狂动物城', 'Zootopia', '拜伦·霍华德, 瑞奇·摩尔', '金妮弗·古德温, 杰森·贝特曼', '动画, 喜剧, 冒险', '2016-03-04', '美国', '英语', 108, '兔子警官与狐狸搭档在动物城市中追查阴谋，也拆解偏见、身份和制度问题。', 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=700&q=85', 'ONLINE', 3198, 5, 9.0, 8.9, 9.2, 8.7),
-(109, '寄生虫', 'Parasite', '奉俊昊', '宋康昊, 李善均, 赵汝贞, 崔宇植', '剧情, 惊悚', '2019-05-30', '韩国', '韩语', 132, '贫富阶层在一栋住宅中短暂交叠，黑色幽默逐步滑向无法回头的社会寓言。', 'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=700&q=85', 'ONLINE', 3012, 5, 8.9, 9.2, 8.8, 9.1),
-(110, '机器人总动员', 'WALL·E', '安德鲁·斯坦顿', '本·贝尔特, 艾丽莎·奈特', '动画, 科幻, 爱情', '2008-06-27', '美国', '英语', 98, '孤独清洁机器人在废弃地球上守候文明余烬，一段几乎无对白的爱情照亮未来。', 'https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=700&q=85', 'ONLINE', 2860, 5, 9.3, 9.0, 9.5, 8.8),
-(111, '让子弹飞', 'Let the Bullets Fly', '姜文', '姜文, 葛优, 周润发', '剧情, 喜剧, 动作', '2010-12-16', '中国大陆', '汉语普通话', 132, '土匪、县长与恶霸在鹅城展开权力游戏，荒诞笑料背后是锋利的政治寓言。', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=700&q=85', 'ONLINE', 2721, 5, 8.9, 9.0, 8.7, 9.2),
-(112, '海上钢琴师', 'The Legend of 1900', '朱塞佩·托纳多雷', '蒂姆·罗斯, 普路特·泰勒·文斯', '剧情, 音乐', '1998-10-28', '意大利', '英语', 165, '生于海上、长于钢琴的1900拒绝踏上陆地，他的音乐与孤独一起成为传奇。', 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=85', 'ONLINE', 2602, 5, 9.2, 9.1, 8.9, 9.3);
+(101, '肖申克的救赎', 'The Shawshank Redemption', '弗兰克·德拉邦特', '蒂姆·罗宾斯, 摩根·弗里曼, 鲍勃·冈顿', '剧情, 犯罪', '1994-09-10', '美国', '英语', 142, '银行家安迪蒙冤入狱，在漫长岁月中以理性、友谊和希望对抗制度化的牢笼。', '/merch-shubiao.png', 'ONLINE', 4820, 5, 9.6, 9.7, 8.7, 9.5),
+(102, '霸王别姬', 'Farewell My Concubine', '陈凯歌', '张国荣, 张丰毅, 巩俐', '剧情, 爱情, 历史', '1993-01-01', '中国大陆, 中国香港', '汉语普通话', 171, '两位京剧演员的命运与时代洪流交错，戏里戏外都写满身份、情感与历史创伤。', '/merch-shubiao.png', 'ONLINE', 4632, 5, 9.5, 9.8, 9.1, 9.7),
+(103, '泰坦尼克号', 'Titanic', '詹姆斯·卡梅隆', '莱昂纳多·迪卡普里奥, 凯特·温斯莱特', '剧情, 爱情, 灾难', '1997-12-19', '美国', '英语', 194, '一段跨越阶层的爱情在巨轮沉没的历史时刻中绽放，浪漫与灾难互为镜像。', '/merch-shubiao.png', 'ONLINE', 4388, 5, 9.4, 9.2, 9.5, 9.3),
+(104, '千与千寻', 'Spirited Away', '宫崎骏', '柊瑠美, 入野自由, 夏木真理', '动画, 奇幻, 冒险', '2001-07-20', '日本', '日语', 125, '少女千寻误入神灵世界，在劳动、勇气与记忆中完成自我成长。', '/merch-shubiao.png', 'ONLINE', 4211, 5, 9.3, 9.3, 9.6, 8.9),
+(105, '这个杀手不太冷', 'Léon', '吕克·贝松', '让·雷诺, 娜塔莉·波特曼, 加里·奥德曼', '剧情, 动作, 犯罪', '1994-09-14', '法国, 美国', '英语', 110, '孤独杀手与失去家人的少女意外相遇，冷硬城市里生长出脆弱而危险的依恋。', '/merch-shubiao.png', 'ONLINE', 3981, 5, 9.2, 9.0, 8.8, 9.4),
+(106, '阿甘正传', 'Forrest Gump', '罗伯特·泽米吉斯', '汤姆·汉克斯, 罗宾·怀特, 加里·西尼斯', '剧情, 爱情', '1994-07-06', '美国', '英语', 142, '阿甘以朴素、执着和善意穿过美国数十年历史，也让普通人的生命显出童话般的光。', '/merch-shubiao.png', 'ONLINE', 3762, 5, 9.2, 9.1, 8.7, 9.4),
+(107, '楚门的世界', 'The Truman Show', '彼得·威尔', '金·凯瑞, 劳拉·琳妮, 艾德·哈里斯', '剧情, 科幻', '1998-06-05', '美国', '英语', 103, '楚门生活在一场巨大的真人秀中，当真实的边界被撕开，他必须选择是否走向未知。', '/merch-shubiao.png', 'ONLINE', 3520, 5, 9.1, 9.3, 8.5, 9.0),
+(108, '疯狂动物城', 'Zootopia', '拜伦·霍华德, 瑞奇·摩尔', '金妮弗·古德温, 杰森·贝特曼', '动画, 喜剧, 冒险', '2016-03-04', '美国', '英语', 108, '兔子警官与狐狸搭档在动物城市中追查阴谋，也拆解偏见、身份和制度问题。', '/merch-shubiao.png', 'ONLINE', 3198, 5, 9.0, 8.9, 9.2, 8.7),
+(109, '寄生虫', 'Parasite', '奉俊昊', '宋康昊, 李善均, 赵汝贞, 崔宇植', '剧情, 惊悚', '2019-05-30', '韩国', '韩语', 132, '贫富阶层在一栋住宅中短暂交叠，黑色幽默逐步滑向无法回头的社会寓言。', '/merch-shubiao.png', 'ONLINE', 3012, 5, 8.9, 9.2, 8.8, 9.1),
+(110, '机器人总动员', 'WALL·E', '安德鲁·斯坦顿', '本·贝尔特, 艾丽莎·奈特', '动画, 科幻, 爱情', '2008-06-27', '美国', '英语', 98, '孤独清洁机器人在废弃地球上守候文明余烬，一段几乎无对白的爱情照亮未来。', '/merch-shubiao.png', 'ONLINE', 2860, 5, 9.3, 9.0, 9.5, 8.8),
+(111, '让子弹飞', 'Let the Bullets Fly', '姜文', '姜文, 葛优, 周润发', '剧情, 喜剧, 动作', '2010-12-16', '中国大陆', '汉语普通话', 132, '土匪、县长与恶霸在鹅城展开权力游戏，荒诞笑料背后是锋利的政治寓言。', '/merch-shubiao.png', 'ONLINE', 2721, 5, 8.9, 9.0, 8.7, 9.2),
+(112, '海上钢琴师', 'The Legend of 1900', '朱塞佩·托纳多雷', '蒂姆·罗斯, 普路特·泰勒·文斯', '剧情, 音乐', '1998-10-28', '意大利', '英语', 165, '生于海上、长于钢琴的1900拒绝踏上陆地，他的音乐与孤独一起成为传奇。', '/merch-shubiao.png', 'ONLINE', 2602, 5, 9.2, 9.1, 8.9, 9.3);
 
 INSERT INTO `movie_ratings` (movie_id, user_id, total_score, story_score, visual_score, acting_score) VALUES
 (101,101,9.8,9.8,8.8,9.6),(101,102,9.6,9.7,8.5,9.4),(101,103,9.5,9.6,8.7,9.5),
@@ -89,7 +89,7 @@ INSERT INTO `long_reviews` (id, movie_id, user_id, title, content_md, cover_url,
 
 《肖申克的救赎》最容易被概括成“希望”的故事，但如果只停留在这两个字上，反而会错过它最有力量的部分。安迪真正打动人的地方，不是他始终乐观，而是他在一个几乎把人变成编号的地方，仍然保留了缓慢、清醒、具体的行动能力。
 
-![监狱与光](https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=85)
+![监狱与光](/merch-shubiao.png)
 
 ### 一、制度化不是口号，而是日常的磨损
 
@@ -116,14 +116,14 @@ INSERT INTO `long_reviews` (id, movie_id, user_id, title, content_md, cover_url,
 如果说安迪是火种，瑞德就是被火照亮的人。影片最后真正完成成长的是瑞德：他学会相信一条看似遥远的路，也学会在假释后重新选择生活。结尾海边相遇之所以动人，是因为它不是童话式团圆，而是两个被制度伤害的人终于把自己交还给世界。
 
 **这部电影的伟大，不是告诉我们“希望一定胜利”，而是告诉我们：不要太早把自己交给绝望。**',
-'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=85','ONLINE',620,68,21,9,1,NOW(),NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',620,68,21,9,1,NOW(),NOW(),NOW()),
 
 (102,102,102,'《霸王别姬》：一生一戏，一戏一生',
 '## 戏台、时代与无法抽身的人
 
 《霸王别姬》的悲剧从来不只属于某一个人。程蝶衣、段小楼、菊仙都被时代推着走，他们以为自己在选择爱情、艺术或生活，其实每一步都踩在历史裂缝上。
 
-![戏台光影](https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=1200&q=85)
+![戏台光影](/merch-shubiao.png)
 
 ### 一、程蝶衣为什么无法从戏里出来
 
@@ -150,14 +150,14 @@ INSERT INTO `long_reviews` (id, movie_id, user_id, title, content_md, cover_url,
 因为影片没有把历史当背景板，而是让历史进入每个人的身体。一次审判、一句口号、一次转身，都能改变关系的温度。到最后，“从一而终”既是戏词，也是程蝶衣无法达成的生命愿望。
 
 **《霸王别姬》不是怀旧，它是在追问：当时代反复改写人的身份，一个人还如何守住自己？**',
-'https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=1200&q=85','ONLINE',590,72,24,11,1,NOW(),NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',590,72,24,11,1,NOW(),NOW(),NOW()),
 
 (103,104,103,'《千与千寻》：成长不是变强，而是学会记得',
 '## 名字、劳动与回家的路
 
 《千与千寻》表面上是少女冒险，内里却是一套非常完整的成长寓言。千寻进入汤屋后，被夺走名字，被迫劳动，被要求适应规则。她并不是突然变成勇敢的人，而是在每一次具体行动中慢慢找回自己。
 
-![奇幻旅途](https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=1200&q=85)
+![奇幻旅途](/merch-shubiao.png)
 
 ### 一、名字是自我的锚点
 
@@ -185,14 +185,14 @@ INSERT INTO `long_reviews` (id, movie_id, user_id, title, content_md, cover_url,
 无脸男像一面镜子。他在汤屋里被欲望喂大，也被欲望吞噬。千寻没有用暴力消灭他，而是把他带离那个不断诱导消费和交换的空间。这个处理非常温柔：有些失控不是因为本性邪恶，而是因为环境持续放大空洞。
 
 **《千与千寻》最终讲的是回家，但回家的人已经不同。千寻带回现实的不是魔法，而是记得自己是谁的能力。**',
-'https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=1200&q=85','ONLINE',510,54,18,7,1,NOW(),NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',510,54,18,7,1,NOW(),NOW(),NOW()),
 
 (104,107,104,'《楚门的世界》：当生活变成被观看的节目',
 '## 真实的边界在哪里
 
 《楚门的世界》放在今天看，几乎像一则提前写好的互联网寓言。楚门被困在摄影棚里，我们没有被困在实体棚景中，但我们的偏好、路线、消费和情绪同样被持续记录、预测和包装。
 
-![被观看的城市](https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1200&q=85)
+![被观看的城市](/merch-shubiao.png)
 
 ### 一、桃源镇为什么可怕
 
@@ -220,14 +220,14 @@ INSERT INTO `long_reviews` (id, movie_id, user_id, title, content_md, cover_url,
 因为现代生活中，很多“选择”其实已经被设计过。平台推荐我们可能喜欢的内容，消费系统告诉我们应该拥有什么，社交媒体训练我们如何展示自己。《楚门的世界》的问题并没有过时：如果一个世界足够舒适，但它不真实，你愿意离开吗？
 
 **楚门推门而出的瞬间，真正打动人的不是他找到了外面的世界，而是他终于决定不再接受被安排的人生。**',
-'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1200&q=85','ONLINE',460,43,14,6,1,NOW(),NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',460,43,14,6,1,NOW(),NOW(),NOW()),
 
 (105,109,105,'《寄生虫》：楼梯、气味与无法跨越的阶层',
 '## 黑色幽默如何变成冷汗
 
 《寄生虫》前半段像精密喜剧，后半段却让人笑不出来。奉俊昊最厉害的地方，是他没有把贫富差距讲成抽象概念，而是把阶层拍成空间、气味、雨水和楼梯。
 
-![城市阶层](https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=1200&q=85)
+![城市阶层](/merch-shubiao.png)
 
 ### 一、空间就是阶层
 
@@ -254,14 +254,14 @@ INSERT INTO `long_reviews` (id, movie_id, user_id, title, content_md, cover_url,
 儿子计划赚钱买下豪宅，看似励志，实则悲凉。影片没有直接否定努力，但它让我们看见：在一个结构性不平等的系统里，个人计划常常只是维持希望的叙事。
 
 **《寄生虫》不是在说穷人更善良或富人更邪恶，而是在说当社会被垂直切开，每个人都会被迫以某种方式寄生。**',
-'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=1200&q=85','ONLINE',430,39,12,5,0,NULL,NOW(),NOW()),
+'/merch-shubiao.png','ONLINE',430,39,12,5,0,NULL,NOW(),NOW()),
 
 (106,110,103,'《机器人总动员》：废墟里的爱情与文明余烬',
 '## 无对白的孤独为什么动人
 
 《机器人总动员》前半段几乎没有传统对白，却比许多台词密集的电影更会表达情感。瓦力每天压缩垃圾、收藏小物件、看旧录像带，他像文明废墟里最后一个仍然保留好奇心的孩子。
 
-![未来废墟](https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=1200&q=85)
+![未来废墟](/merch-shubiao.png)
 
 ### 一、瓦力收藏的不是物品，是记忆
 
@@ -284,15 +284,15 @@ INSERT INTO `long_reviews` (id, movie_id, user_id, title, content_md, cover_url,
 > 重新站起来，不只是身体动作，也是文明重新承担责任的开始。
 
 **最浪漫的不是瓦力牵到伊娃的手，而是在一片废墟里，他仍然相信世界可以被重新整理。**',
-'https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=1200&q=85','ONLINE',390,31,9,4,0,NULL,NOW(),NOW());
+'/merch-shubiao.png','ONLINE',390,31,9,4,0,NULL,NOW(),NOW());
 
 INSERT INTO `review_images` (review_id, image_url, sort_order) VALUES
-(101,'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=85',1),
-(102,'https://images.unsplash.com/photo-1523207911345-32501502db22?auto=format&fit=crop&w=1200&q=85',1),
-(103,'https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=1200&q=85',1),
-(104,'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1200&q=85',1),
-(105,'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=1200&q=85',1),
-(106,'https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=1200&q=85',1);
+(101,'/merch-shubiao.png',1),
+(102,'/merch-shubiao.png',1),
+(103,'/merch-shubiao.png',1),
+(104,'/merch-shubiao.png',1),
+(105,'/merch-shubiao.png',1),
+(106,'/merch-shubiao.png',1);
 
 INSERT INTO `news_articles` (id, title, summary, content, cover_url, category, source, status, view_count, is_hot, published_at, created_at, updated_at) VALUES
 (201,'经典电影修复与重映带动长评讨论升温','多部经典电影进入修复和重映视野，观众围绕表演、影像质感和时代记忆展开新的讨论。',
@@ -303,7 +303,7 @@ INSERT INTO `news_articles` (id, title, summary, content, cover_url, category, s
 业内人士认为，修复重映对电影社区的价值不只是票房补充，更重要的是建立公共讨论空间。用户在看完影片后发布长评、补充幕后资料、比较不同版本差异，这些内容会反过来丰富电影资料库，让电影从一次消费变成持续交流的文化对象。
 
 平台后续也将围绕经典影片设置专题推荐、长评征集和影迷片单活动，鼓励用户以更完整的方式记录观影体验。对于电影点评系统而言，这类内容非常适合作为首页推荐和高赞长评的来源。',
-'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=85','电影动态','平台编辑','ONLINE',2680,1,NOW(),NOW(),NOW()),
+'/merch-shubiao.png','电影动态','平台编辑','ONLINE',2680,1,NOW(),NOW(),NOW()),
 (202,'动画电影的成人表达正在被更多观众重新看见','动画不再只是低龄娱乐，成长、孤独、身份和社会议题正在成为动画长评中的高频关键词。',
 '动画电影在影迷社区中的讨论热度持续上升。以《千与千寻》《机器人总动员》《疯狂动物城》为代表的作品，正在被更多观众从成人视角重新解读。
 
@@ -312,7 +312,7 @@ INSERT INTO `news_articles` (id, title, summary, content, cover_url, category, s
 从长评内容看，用户常常会把动画中的设定与现实经验连接起来。例如汤屋被解释为微缩社会，无脸男被视为空洞欲望的化身，动物城中的职业壁垒则被联系到现实中的刻板印象。动画的优势在于，它能让抽象议题具象化，也能降低严肃表达的进入门槛。
 
 平台建议在电影详情页中为动画作品强化“主题解读”“角色分析”和“视觉风格”标签，方便用户快速找到更深入的讨论内容。',
-'https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=1200&q=85','行业观察','平台编辑','ONLINE',2240,1,NOW(),NOW(),NOW()),
+'/merch-shubiao.png','行业观察','平台编辑','ONLINE',2240,1,NOW(),NOW(),NOW()),
 (203,'社会寓言类电影成为近期长评热门方向','《寄生虫》《楚门的世界》等影片被频繁提及，观众更关注影像背后的社会结构问题。',
 '近期长评区中，社会寓言类电影的讨论明显增多。《寄生虫》《楚门的世界》《让子弹飞》等作品被用户反复引用，成为分析阶层、媒介、权力和日常生活结构的重要文本。
 
@@ -321,7 +321,7 @@ INSERT INTO `news_articles` (id, title, summary, content, cover_url, category, s
 从互动数据看，包含空间分析、符号解读和现实联系的长评更容易获得收藏。用户不只想知道剧情发生了什么，更想知道“为什么这样拍”和“它与我们有什么关系”。
 
 后续资讯栏目将持续整理社会寓言类影片专题，并与电影详情页中的长评、短评和解读视频形成联动。',
-'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1200&q=85','专题策划','平台编辑','ONLINE',1980,1,NOW(),NOW(),NOW()),
+'/merch-shubiao.png','专题策划','平台编辑','ONLINE',1980,1,NOW(),NOW(),NOW()),
 (204,'高分爱情电影为何能长期保持讨论度','爱情类型片的生命力来自时代情绪、角色关系和观众自我投射，而不只是浪漫桥段。',
 '爱情电影一直是影迷社区的高频讨论类型，但真正能长期保持热度的作品并不多。《泰坦尼克号》《海上钢琴师》《这个杀手不太冷》等影片之所以多年后仍被提起，是因为它们并没有只提供浪漫关系，而是把爱情放进更复杂的处境中。
 
@@ -330,7 +330,7 @@ INSERT INTO `news_articles` (id, title, summary, content, cover_url, category, s
 平台长评数据显示，爱情片长评如果能兼顾角色心理和影像细节，往往比单纯抒情更容易被点赞。短评负责记录即时情绪，长评则适合承载更完整的关系分析。
 
 未来电影详情页可以为爱情类电影增加“关系解读”“时代背景”“经典场面”三个入口，帮助用户从不同角度进入讨论。',
-'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=85','类型观察','平台编辑','ONLINE',1760,0,NOW(),NOW(),NOW());
+'/merch-shubiao.png','类型观察','平台编辑','ONLINE',1760,0,NOW(),NOW(),NOW());
 
 INSERT INTO `news_relations` (news_id, target_type, target_id, target_name) VALUES
 (201,'MOVIE',101,'肖申克的救赎'),(201,'MOVIE',102,'霸王别姬'),(201,'MOVIE',104,'千与千寻'),

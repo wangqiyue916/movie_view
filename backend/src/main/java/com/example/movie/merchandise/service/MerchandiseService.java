@@ -20,7 +20,8 @@ public class MerchandiseService {
 
     public IPage<Merchandise> pageProducts(Integer page, Integer pageSize, Long movieId, String productType, String keyword) {
         LambdaQueryWrapper<Merchandise> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Merchandise::getStatus, "ONLINE");
+        wrapper.eq(Merchandise::getStatus, "ONLINE")
+                .isNull(Merchandise::getDeletedAt);
 
         if (movieId != null) {
             wrapper.eq(Merchandise::getMovieId, movieId);
@@ -42,6 +43,7 @@ public class MerchandiseService {
     public List<Merchandise> listByMovie(Long movieId) {
         LambdaQueryWrapper<Merchandise> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Merchandise::getStatus, "ONLINE")
+                .isNull(Merchandise::getDeletedAt)
                 .eq(Merchandise::getMovieId, movieId)
                 .last("LIMIT 6");
         return merchandiseMapper.selectList(wrapper);
@@ -58,7 +60,11 @@ public class MerchandiseService {
     }
 
     public void deleteProduct(Long id) {
-        merchandiseMapper.deleteById(id);
+        Merchandise m = merchandiseMapper.selectById(id);
+        if (m != null) {
+            m.setDeletedAt(java.time.LocalDateTime.now());
+            merchandiseMapper.updateById(m);
+        }
     }
 
     public void recordClick(Long id) {
