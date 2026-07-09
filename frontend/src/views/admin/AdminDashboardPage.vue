@@ -95,6 +95,7 @@ interface Stats {
 
 const stats = ref<Stats>({
   pendingAudits: 0,
+  pendingCerts: 0,
   pendingReports: 0,
   onlineContent: 0,
 })
@@ -105,6 +106,7 @@ async function fetchStats() {
   try {
     const res: any = await request.get('/admin/dashboard')
     stats.value.pendingAudits = res.pendingAudits || 0
+    stats.value.pendingCerts = res.pendingCerts || 0
     stats.value.pendingReports = res.pendingReports || 0
     stats.value.onlineContent = res.onlineContent || 0
     recentAudits.value = (res.recentAudits || []).map((a: any) => ({
@@ -113,7 +115,7 @@ async function fetchStats() {
       title: a.reason || a.type || '-',
     }))
   } catch {
-    stats.value = { pendingAudits: 0, pendingReports: 0, onlineContent: 0 }
+    stats.value = { pendingAudits: 0, pendingCerts: 0, pendingReports: 0, onlineContent: 0 }
   }
 }
 
