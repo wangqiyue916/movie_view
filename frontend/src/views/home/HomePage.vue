@@ -92,7 +92,15 @@
         <router-link to="/long-reviews" class="news-more-link">更多 ›</router-link>
       </div>
       <div class="review-list">
-        <article v-for="review in featuredReviews" :key="review.title" class="review-card">
+        <article
+          v-for="review in featuredReviews"
+          :key="review.id || review.title"
+          class="review-card"
+          role="button"
+          tabindex="0"
+          @click="openReview(review)"
+          @keyup.enter="openReview(review)"
+        >
           <h3>{{ review.title }}</h3>
           <p>{{ review.excerpt }}</p>
           <div class="review-meta">
@@ -202,6 +210,14 @@ async function fetchHomeData() {
 
 const openMovie = (id: number | undefined, title: string) => {
   router.push(`/movies/${id || seededMovieIds[title] || 1}`)
+}
+
+const openReview = (review: ReviewItem) => {
+  if (review.id) {
+    router.push(`/long-reviews/${review.id}`)
+    return
+  }
+  router.push('/long-reviews')
 }
 
 onMounted(() => {
@@ -677,6 +693,14 @@ onBeforeUnmount(() => {
 .review-card {
   min-height: 108px;
   padding: 13px 16px;
+  cursor: pointer;
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.review-card:hover {
+  border-color: rgb(214 176 95 / 48%);
+  box-shadow: 0 14px 34px rgb(0 0 0 / 44%);
+  transform: translateY(-1px);
 }
 
 .review-card p {

@@ -41,6 +41,7 @@ export interface MovieItem {
 }
 
 export interface ReviewItem {
+  id?: number
   title: string
   excerpt: string
   author: string

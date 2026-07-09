@@ -1,7 +1,11 @@
 package com.example.movie.news.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.movie.common.response.ApiResponse;
+import com.example.movie.longreview.entity.LongReview;
+import com.example.movie.longreview.mapper.LongReviewMapper;
+import com.example.movie.longreview.vo.FeaturedReviewVO;
 import com.example.movie.news.entity.HomepageRecommendation;
 import com.example.movie.news.mapper.HomepageRecommendationMapper;
 import com.example.movie.news.service.NewsService;
@@ -22,10 +26,14 @@ public class HomeController {
 
     private final NewsService newsService;
     private final HomepageRecommendationMapper recommendationMapper;
+    private final LongReviewMapper longReviewMapper;
 
-    public HomeController(NewsService newsService, HomepageRecommendationMapper recommendationMapper) {
+    public HomeController(NewsService newsService,
+                          HomepageRecommendationMapper recommendationMapper,
+                          LongReviewMapper longReviewMapper) {
         this.newsService = newsService;
         this.recommendationMapper = recommendationMapper;
+        this.longReviewMapper = longReviewMapper;
     }
 
     /**
@@ -70,8 +78,9 @@ public class HomeController {
         // TODO: 对接王琪越 - 最新电影 Mock
         data.put("latestMovies", buildMockLatestMovies());
 
-        // TODO: 对接郭俊岑 - 优质长评 Mock
-        data.put("featuredReviews", buildMockFeaturedReviews());
+        // 优质长评：优先使用长评模块真实精选数据，无数据时降级 Mock
+        List<Map<String, Object>> featuredReviews = buildFeaturedReviews();
+        data.put("featuredReviews", featuredReviews.isEmpty() ? buildMockFeaturedReviews() : featuredReviews);
 
         // TODO: 对接周秋宏 - 推荐周边 Mock
         data.put("recommendedMerchandise", buildMockMerchandise());
@@ -113,6 +122,7 @@ public class HomeController {
     private List<Map<String, Object>> buildMockFeaturedReviews() {
         List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> r1 = new LinkedHashMap<>();
+        r1.put("id", 1L);
         r1.put("title", "穿越星际之后，仍然回到人的情感");
         r1.put("excerpt", "它最动人的地方，是把宏大的宇宙尺度和具体的人之间重新连接起来。");
         r1.put("author", "影评人 Mori");
@@ -122,6 +132,7 @@ public class HomeController {
         list.add(r1);
 
         Map<String, Object> r2 = new LinkedHashMap<>();
+        r2.put("id", 2L);
         r2.put("title", "梦境不是谜题，而是欲望的回声");
         r2.put("excerpt", "真正让人反复回看的，并不只是结构，还有每一层梦境背后未被说破的执念。");
         r2.put("author", "用户 北辰");
@@ -131,6 +142,7 @@ public class HomeController {
         list.add(r2);
 
         Map<String, Object> r3 = new LinkedHashMap<>();
+        r3.put("id", 3L);
         r3.put("title", "灾难片里的群像，为什么仍然能打动人");
         r3.put("excerpt", "当宏大工程、末日危机和个体选择并置时，电影真正要讨论的不是奇观本身。");
         r3.put("author", "用户 山止川行");
@@ -139,6 +151,23 @@ public class HomeController {
         r3.put("comments", 3);
         list.add(r3);
 
+        return list;
+    }
+
+    private List<Map<String, Object>> buildFeaturedReviews() {
+        Page<FeaturedReviewVO> page = longReviewMapper.selectFeaturedReviews(new Page<LongReview>(1, 3));
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (FeaturedReviewVO review : page.getRecords()) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("id", review.getId());
+            item.put("title", review.getTitle());
+            item.put("excerpt", review.getSummary());
+            item.put("author", review.getAuthorNickname());
+            item.put("date", review.getCreatedAt() == null ? null : review.getCreatedAt().toLocalDate().toString());
+            item.put("likes", review.getLikeCount());
+            item.put("comments", review.getReplyCount());
+            list.add(item);
+        }
         return list;
     }
 
