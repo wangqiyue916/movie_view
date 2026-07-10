@@ -1,5 +1,6 @@
 package com.example.movie.longreview.controller;
 
+import com.example.movie.common.config.LoginUserContext;
 import com.example.movie.common.response.ApiResponse;
 import com.example.movie.common.response.PageResult;
 import com.example.movie.longreview.dto.CreateReplyRequest;
@@ -25,6 +26,12 @@ public class LongReviewController {
     private final LongReviewService longReviewService;
     private final ReviewReplyService reviewReplyService;
 
+    /** Get current user ID from LoginUserContext (via AuthInterceptor) */
+    private Long currentUserId() {
+        Long id = LoginUserContext.getUserId();
+        return id != null ? id : 1L; // fallback for unauthenticated
+    }
+
     @GetMapping
     public ApiResponse<PageResult<LongReviewVO>> getReviewList(
             @RequestParam(required = false) Long movieId,
@@ -36,21 +43,21 @@ public class LongReviewController {
         query.setSortBy(sortBy);
         query.setPage(page);
         query.setPageSize(pageSize);
-        return ApiResponse.success(longReviewService.getReviewList(query, 1L));
+        return ApiResponse.success(longReviewService.getReviewList(query, currentUserId()));
     }
 
     @GetMapping("/my")
     public ApiResponse<PageResult<LongReviewVO>> getMyReviews(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        return ApiResponse.success(longReviewService.getMyReviews(1L, page, pageSize));
+        return ApiResponse.success(longReviewService.getMyReviews(currentUserId(), page, pageSize));
     }
 
     @GetMapping("/favorites")
     public ApiResponse<PageResult<LongReviewVO>> getFavoriteReviews(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        return ApiResponse.success(longReviewService.getFavoriteReviews(1L, page, pageSize));
+        return ApiResponse.success(longReviewService.getFavoriteReviews(currentUserId(), page, pageSize));
     }
 
     @GetMapping("/featured")
@@ -62,38 +69,38 @@ public class LongReviewController {
 
     @GetMapping("/{reviewId}")
     public ApiResponse<LongReviewVO> getReviewDetail(@PathVariable Long reviewId) {
-        return ApiResponse.success(longReviewService.getReviewDetail(reviewId, 1L));
+        return ApiResponse.success(longReviewService.getReviewDetail(reviewId, currentUserId()));
     }
 
     @PostMapping
     public ApiResponse<Map<String, Long>> createReview(@Valid @RequestBody CreateReviewRequest request) {
-        Long id = longReviewService.createReview(request, 1L);
+        Long id = longReviewService.createReview(request, currentUserId());
         return ApiResponse.success(Map.of("id", id));
     }
 
     @PutMapping("/{reviewId}")
     public ApiResponse<Void> updateReview(@PathVariable Long reviewId,
                                            @Valid @RequestBody UpdateReviewRequest request) {
-        longReviewService.updateReview(reviewId, request, 1L);
+        longReviewService.updateReview(reviewId, request, currentUserId());
         return ApiResponse.success();
     }
 
     @PostMapping("/{reviewId}/like")
     public ApiResponse<Void> likeReview(@PathVariable Long reviewId) {
-        longReviewService.likeReview(reviewId, 1L);
+        longReviewService.likeReview(reviewId, currentUserId());
         return ApiResponse.success();
     }
 
     @PostMapping("/{reviewId}/favorite")
     public ApiResponse<Void> favoriteReview(@PathVariable Long reviewId) {
-        longReviewService.favoriteReview(reviewId, 1L);
+        longReviewService.favoriteReview(reviewId, currentUserId());
         return ApiResponse.success();
     }
 
     @PostMapping("/{reviewId}/report")
     public ApiResponse<Void> reportReview(@PathVariable Long reviewId,
                                            @RequestBody Map<String, String> body) {
-        longReviewService.reportReview(reviewId, 1L, body.get("reason"));
+        longReviewService.reportReview(reviewId, currentUserId(), body.get("reason"));
         return ApiResponse.success();
     }
 
@@ -102,19 +109,19 @@ public class LongReviewController {
             @PathVariable Long reviewId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer pageSize) {
-        return ApiResponse.success(reviewReplyService.getReplies(reviewId, 1L, page, pageSize));
+        return ApiResponse.success(reviewReplyService.getReplies(reviewId, currentUserId(), page, pageSize));
     }
 
     @PostMapping("/{reviewId}/replies")
     public ApiResponse<Map<String, Long>> createReply(@PathVariable Long reviewId,
                                                         @Valid @RequestBody CreateReplyRequest request) {
-        Long id = reviewReplyService.createReply(reviewId, request, 1L);
+        Long id = reviewReplyService.createReply(reviewId, request, currentUserId());
         return ApiResponse.success(Map.of("id", id));
     }
 
     @PostMapping("/replies/{replyId}/like")
     public ApiResponse<Void> likeReply(@PathVariable Long replyId) {
-        reviewReplyService.likeReply(replyId, 1L);
+        reviewReplyService.likeReply(replyId, currentUserId());
         return ApiResponse.success();
     }
 }
