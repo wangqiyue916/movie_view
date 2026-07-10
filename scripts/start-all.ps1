@@ -37,15 +37,8 @@ if (-not $mvnOk) {
     exit 1
 }
 
-# ---- Configure database from environment, with local defaults ----
-Write-Host ">>> Configuring database connection..." -ForegroundColor Yellow
-if (-not $env:DB_HOST) { $env:DB_HOST = "localhost" }
-if (-not $env:DB_PORT) { $env:DB_PORT = "3306" }
-if (-not $env:DB_NAME) { $env:DB_NAME = "movie" }
-if (-not $env:DB_USERNAME) { $env:DB_USERNAME = "root" }
-if (-not $env:DB_PASSWORD) { $env:DB_PASSWORD = "" }
-Write-Host "    Database: $env:DB_HOST`:$env:DB_PORT/$env:DB_NAME" -ForegroundColor Green
-
+# Database connection uses application.yml defaults (remote DMS proxy)
+# No local override - let Spring Boot read its own config
 $nodeVer = & $nodeExe --version
 Write-Host "[OK] Node.js: $nodeVer" -ForegroundColor Green
 Write-Host "[OK] Maven: ready" -ForegroundColor Green
